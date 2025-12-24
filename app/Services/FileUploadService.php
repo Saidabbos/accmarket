@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ProductItemStatus;
 use App\Models\Product;
 use App\Models\ProductItem;
 use Illuminate\Http\UploadedFile;
@@ -10,40 +11,42 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class FileUploadService
 {
+    private const PARSER_METHODS = [
+        'csv' => 'parseCsv',
+        'txt' => 'parseCsv',
+        'json' => 'parseJson',
+        'xlsx' => 'parseExcel',
+        'xls' => 'parseExcel',
+    ];
+
     public function processFile(UploadedFile $file, Product $product): array
     {
         $extension = strtolower($file->getClientOriginalExtension());
 
         try {
-            $items = match ($extension) {
-                'csv', 'txt' => $this->parseCsv($file),
-                'json' => $this->parseJson($file),
-                'xlsx', 'xls' => $this->parseExcel($file),
-                default => throw new \Exception("Unsupported file format: {$extension}"),
-            };
+            $items = $this->parseFileByExtension($file, $extension);
 
             if (empty($items)) {
-                return [
-                    'success' => false,
-                    'message' => 'No valid items found in the file.',
-                    'count' => 0,
-                ];
+                return $this->errorResponse('No valid items found in the file.');
             }
 
             $count = $this->createProductItems($product, $items);
 
-            return [
-                'success' => true,
-                'message' => "Successfully imported {$count} items.",
-                'count' => $count,
-            ];
+            return $this->successResponse($count);
         } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Error processing file: ' . $e->getMessage(),
-                'count' => 0,
-            ];
+            return $this->errorResponse('Error processing file: ' . $e->getMessage());
         }
+    }
+
+    private function parseFileByExtension(UploadedFile $file, string $extension): array
+    {
+        if (!isset(self::PARSER_METHODS[$extension])) {
+            throw new \Exception("Unsupported file format: {$extension}");
+        }
+
+        $parserMethod = self::PARSER_METHODS[$extension];
+
+        return $this->$parserMethod($file);
     }
 
     private function parseCsv(UploadedFile $file): array
@@ -72,6 +75,13 @@ class FileUploadService
         $content = file_get_contents($file->getRealPath());
         $data = json_decode($content, true);
 
+        $this->validateJsonData($data);
+
+        return $this->extractItemsFromJsonData($data);
+    }
+
+    private function validateJsonData($data): void
+    {
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \Exception('Invalid JSON format: ' . json_last_error_msg());
         }
@@ -79,8 +89,12 @@ class FileUploadService
         if (!is_array($data)) {
             throw new \Exception('JSON must contain an array of items.');
         }
+    }
 
+    private function extractItemsFromJsonData(array $data): array
+    {
         $items = [];
+
         foreach ($data as $item) {
             if (is_string($item)) {
                 $items[] = trim($item);
@@ -103,16 +117,7 @@ class FileUploadService
         $items = [];
 
         foreach ($worksheet->getRowIterator() as $row) {
-            $cellIterator = $row->getCellIterator();
-            $cellIterator->setIterateOnlyExistingCells(false);
-
-            $rowData = [];
-            foreach ($cellIterator as $cell) {
-                $value = $cell->getValue();
-                if ($value !== null && $value !== '') {
-                    $rowData[] = trim((string) $value);
-                }
-            }
+            $rowData = $this->extractRowData($row);
 
             if (!empty($rowData)) {
                 $items[] = implode(':', $rowData);
@@ -122,34 +127,42 @@ class FileUploadService
         return $items;
     }
 
+    private function extractRowData($row): array
+    {
+        $cellIterator = $row->getCellIterator();
+        $cellIterator->setIterateOnlyExistingCells(false);
+        $rowData = [];
+
+        foreach ($cellIterator as $cell) {
+            $value = $cell->getValue();
+            if ($value !== null && $value !== '') {
+                $rowData[] = trim((string) $value);
+            }
+        }
+
+        return $rowData;
+    }
+
     private function createProductItems(Product $product, array $items): int
     {
         $count = 0;
-        $batchSize = 500;
+        $batchSize = config('shop.file_upload.batch_size');
         $batch = [];
 
         DB::beginTransaction();
 
         try {
             foreach ($items as $content) {
-                $batch[] = [
-                    'product_id' => $product->id,
-                    'content' => $content,
-                    'status' => 'available',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
+                $batch[] = $this->buildProductItemData($product->id, $content);
 
                 if (count($batch) >= $batchSize) {
-                    ProductItem::insert($batch);
-                    $count += count($batch);
+                    $count += $this->insertBatch($batch);
                     $batch = [];
                 }
             }
 
             if (!empty($batch)) {
-                ProductItem::insert($batch);
-                $count += count($batch);
+                $count += $this->insertBatch($batch);
             }
 
             DB::commit();
@@ -159,5 +172,40 @@ class FileUploadService
             DB::rollBack();
             throw $e;
         }
+    }
+
+    private function buildProductItemData(int $productId, string $content): array
+    {
+        return [
+            'product_id' => $productId,
+            'content' => $content,
+            'status' => ProductItemStatus::AVAILABLE->value,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+    }
+
+    private function insertBatch(array $batch): int
+    {
+        ProductItem::insert($batch);
+        return count($batch);
+    }
+
+    private function successResponse(int $count): array
+    {
+        return [
+            'success' => true,
+            'message' => "Successfully imported {$count} items.",
+            'count' => $count,
+        ];
+    }
+
+    private function errorResponse(string $message): array
+    {
+        return [
+            'success' => false,
+            'message' => $message,
+            'count' => 0,
+        ];
     }
 }

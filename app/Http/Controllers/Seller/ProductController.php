@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Seller\StoreProductRequest;
+use App\Http\Requests\Seller\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\FileUploadService;
@@ -32,7 +34,7 @@ class ProductController extends Controller
                 $query->where('category_id', $categoryId);
             })
             ->latest()
-            ->paginate(15)
+            ->paginate(config('shop.pagination.seller_products_per_page'))
             ->withQueryString();
 
         $categories = Category::active()->orderBy('name')->get(['id', 'name', 'parent_id']);
@@ -57,42 +59,39 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:5000',
-            'price' => 'required|numeric|min:0.01|max:99999.99',
-            'category_id' => 'required|exists:categories,id',
-            'items_file' => 'required|file|mimes:csv,txt,json,xlsx,xls|max:10240',
-        ]);
+        try {
+            $validated = $request->validated();
 
-        $product = Product::create([
-            'seller_id' => Auth::id(),
-            'category_id' => $validated['category_id'],
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']) . '-' . Str::random(6),
-            'description' => $validated['description'] ?? '',
-            'price' => $validated['price'],
-            'status' => 'draft',
-            'stock_count' => 0,
-        ]);
+            $action = new \App\Actions\Seller\CreateProductAction();
+            $product = $action->execute([
+                'seller_id' => Auth::id(),
+                'category_id' => $validated['category_id'],
+                'name' => $validated['name'],
+                'description' => $validated['description'] ?? '',
+                'price' => $validated['price'],
+                'status' => \App\Enums\ProductStatus::DRAFT->value,
+            ]);
 
-        $result = $this->fileUploadService->processFile(
-            $request->file('items_file'),
-            $product
-        );
+            $result = $this->fileUploadService->processFile(
+                $request->file('items_file'),
+                $product
+            );
 
-        if (!$result['success']) {
-            $product->delete();
-            return back()->withErrors(['items_file' => $result['message']]);
+            if (!$result['success']) {
+                $product->delete();
+                return back()->withErrors(['items_file' => $result['message']]);
+            }
+
+            $product->updateStockCount();
+
+            return redirect()
+                ->route('seller.products.index')
+                ->with('success', "Product created with {$result['count']} items.");
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
-
-        $product->updateStockCount();
-
-        return redirect()
-            ->route('seller.products.index')
-            ->with('success', "Product created with {$result['count']} items.");
     }
 
     public function show(Product $product)
@@ -127,45 +126,44 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        $this->authorize('update', $product);
+        try {
+            $validated = $request->validated();
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:5000',
-            'price' => 'required|numeric|min:0.01|max:99999.99',
-            'category_id' => 'required|exists:categories,id',
-            'items_file' => 'nullable|file|mimes:csv,txt,json,xlsx,xls|max:10240',
-        ]);
+            $action = new \App\Actions\Seller\UpdateProductAction();
+            $action->execute([
+                'product_id' => $product->id,
+                'seller_id' => Auth::id(),
+                'name' => $validated['name'],
+                'description' => $validated['description'] ?? '',
+                'price' => $validated['price'],
+                'category_id' => $validated['category_id'],
+            ]);
 
-        $product->update([
-            'name' => $validated['name'],
-            'description' => $validated['description'] ?? '',
-            'price' => $validated['price'],
-            'category_id' => $validated['category_id'],
-        ]);
+            if ($request->hasFile('items_file')) {
+                $result = $this->fileUploadService->processFile(
+                    $request->file('items_file'),
+                    $product
+                );
 
-        if ($request->hasFile('items_file')) {
-            $result = $this->fileUploadService->processFile(
-                $request->file('items_file'),
-                $product
-            );
+                if (!$result['success']) {
+                    return back()->withErrors(['items_file' => $result['message']]);
+                }
 
-            if (!$result['success']) {
-                return back()->withErrors(['items_file' => $result['message']]);
+                $product->updateStockCount();
+
+                return redirect()
+                    ->route('seller.products.index')
+                    ->with('success', "Product updated. Added {$result['count']} new items.");
             }
-
-            $product->updateStockCount();
 
             return redirect()
                 ->route('seller.products.index')
-                ->with('success', "Product updated. Added {$result['count']} new items.");
+                ->with('success', 'Product updated successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
-
-        return redirect()
-            ->route('seller.products.index')
-            ->with('success', 'Product updated successfully.');
     }
 
     public function destroy(Product $product)

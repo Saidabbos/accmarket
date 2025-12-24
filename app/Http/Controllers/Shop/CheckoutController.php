@@ -56,90 +56,15 @@ class CheckoutController extends Controller
 
     public function process(Request $request)
     {
-        $cart = session('cart', []);
-
-        if (empty($cart)) {
-            return redirect()->route('cart.index')->withErrors(['cart' => 'Your cart is empty.']);
-        }
-
-        DB::beginTransaction();
-
         try {
-            $totalAmount = 0;
-            $orderItems = [];
-
-            foreach ($cart as $productId => $quantity) {
-                $product = Product::withCount('availableItems')
-                    ->lockForUpdate()
-                    ->find($productId);
-
-                if (!$product || $product->status !== 'active') {
-                    throw new \Exception("Product {$productId} is no longer available.");
-                }
-
-                $availableQty = min($quantity, $product->available_items_count);
-                if ($availableQty < 1) {
-                    throw new \Exception("Product '{$product->name}' is out of stock.");
-                }
-
-                $items = ProductItem::where('product_id', $product->id)
-                    ->where('status', 'available')
-                    ->limit($availableQty)
-                    ->lockForUpdate()
-                    ->get();
-
-                if ($items->count() < $availableQty) {
-                    throw new \Exception("Not enough stock for '{$product->name}'.");
-                }
-
-                $orderItems[] = [
-                    'product' => $product,
-                    'items' => $items,
-                    'quantity' => $availableQty,
-                    'price' => $product->price,
-                ];
-
-                $totalAmount += $product->price * $availableQty;
-            }
-
-            // Create order
-            $order = Order::create([
-                'buyer_id' => Auth::id(),
-                'total_amount' => $totalAmount,
-                'payment_status' => 'pending',
-                'status' => 'pending',
+            $action = new \App\Actions\Shop\ProcessCheckoutAction();
+            $order = $action->execute([
+                'user_id' => Auth::id(),
             ]);
 
-            // Reserve items and create order items
-            foreach ($orderItems as $orderItemData) {
-                foreach ($orderItemData['items'] as $productItem) {
-                    // Reserve the product item
-                    $productItem->reserve($order);
-
-                    // Create order item for each product item
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_item_id' => $productItem->id,
-                        'product_id' => $orderItemData['product']->id,
-                        'quantity' => 1,
-                        'price' => $orderItemData['price'],
-                    ]);
-                }
-
-                // Update product stock count
-                $orderItemData['product']->updateStockCount();
-            }
-
-            DB::commit();
-
-            // Clear cart
-            session()->forget('cart');
-
-            // Redirect to payment page
-            return redirect()->route('payment.show', $order)->with('success', 'Order created successfully. Please complete payment.');
-
+            return redirect()->route('payment.show', $order)
+                ->with('success', 'Order created successfully. Please complete payment.');
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['checkout' => $e->getMessage()]);
         }
     }

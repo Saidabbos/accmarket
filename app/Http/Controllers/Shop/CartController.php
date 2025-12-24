@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Shop;
 
+use App\Enums\ProductStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Shop\AddToCartRequest;
+use App\Http\Requests\Shop\UpdateCartRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,7 +14,7 @@ class CartController extends Controller
 {
     public function index()
     {
-        $cart = session('cart', []);
+        $cart = session(config('shop.cart.session_key'), []);
         $cartItems = [];
         $total = 0;
 
@@ -20,7 +23,7 @@ class CartController extends Controller
                 ->withCount('availableItems')
                 ->find($productId);
 
-            if ($product && $product->status === 'active') {
+            if ($product && $product->status === ProductStatus::ACTIVE->value) {
                 $availableQty = min($quantity, $product->available_items_count);
                 if ($availableQty > 0) {
                     $cartItems[] = [
@@ -39,41 +42,24 @@ class CartController extends Controller
         ]);
     }
 
-    public function add(Request $request)
+    public function add(AddToCartRequest $request)
     {
-        $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1|max:100',
-        ]);
+        try {
+            $action = new \App\Actions\Shop\AddToCartAction();
+            $result = $action->execute($request->validated());
 
-        $product = Product::withCount('availableItems')->find($validated['product_id']);
-
-        if (!$product || $product->status !== 'active') {
-            return back()->withErrors(['product' => 'Product is not available.']);
+            return back()->with('success', $result['message']);
+        } catch (\Exception $e) {
+            return back()->withErrors(['product' => $e->getMessage()]);
         }
-
-        if ($product->available_items_count < 1) {
-            return back()->withErrors(['product' => 'Product is out of stock.']);
-        }
-
-        $cart = session('cart', []);
-        $currentQty = $cart[$product->id] ?? 0;
-        $newQty = min($currentQty + $validated['quantity'], $product->available_items_count);
-
-        $cart[$product->id] = $newQty;
-        session(['cart' => $cart]);
-
-        return back()->with('success', 'Product added to cart.');
     }
 
-    public function update(Request $request)
+    public function update(UpdateCartRequest $request)
     {
-        $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:0|max:100',
-        ]);
+        $validated = $request->validated();
+        $sessionKey = config('shop.cart.session_key');
 
-        $cart = session('cart', []);
+        $cart = session($sessionKey, []);
 
         if ($validated['quantity'] === 0) {
             unset($cart[$validated['product_id']]);
@@ -84,7 +70,7 @@ class CartController extends Controller
             }
         }
 
-        session(['cart' => $cart]);
+        session([$sessionKey => $cart]);
 
         return back()->with('success', 'Cart updated.');
     }
@@ -95,23 +81,24 @@ class CartController extends Controller
             'product_id' => 'required|exists:products,id',
         ]);
 
-        $cart = session('cart', []);
+        $sessionKey = config('shop.cart.session_key');
+        $cart = session($sessionKey, []);
         unset($cart[$validated['product_id']]);
-        session(['cart' => $cart]);
+        session([$sessionKey => $cart]);
 
         return back()->with('success', 'Product removed from cart.');
     }
 
     public function clear()
     {
-        session()->forget('cart');
+        session()->forget(config('shop.cart.session_key'));
 
         return back()->with('success', 'Cart cleared.');
     }
 
     public function count()
     {
-        $cart = session('cart', []);
+        $cart = session(config('shop.cart.session_key'), []);
         return response()->json(['count' => array_sum($cart)]);
     }
 }

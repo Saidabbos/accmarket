@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shop;
 
+use App\Actions\Shop\GetProductsAction;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
@@ -10,44 +11,16 @@ use Inertia\Inertia;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, GetProductsAction $getProductsAction)
     {
-        $products = Product::active()
-            ->with(['category', 'seller:id,name'])
-            ->withCount('availableItems')
-            ->withAvg('reviews', 'rating')
-            ->withCount('reviews')
-            ->when($request->search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
-                });
-            })
-            ->when($request->category, function ($query, $categorySlug) {
-                $query->whereHas('category', function ($q) use ($categorySlug) {
-                    $q->where('slug', $categorySlug);
-                });
-            })
-            ->when($request->min_price, function ($query, $minPrice) {
-                $query->where('price', '>=', $minPrice);
-            })
-            ->when($request->max_price, function ($query, $maxPrice) {
-                $query->where('price', '<=', $maxPrice);
-            })
-            ->when($request->sort, function ($query, $sort) {
-                match ($sort) {
-                    'price_asc' => $query->orderBy('price', 'asc'),
-                    'price_desc' => $query->orderBy('price', 'desc'),
-                    'newest' => $query->orderBy('created_at', 'desc'),
-                    'name' => $query->orderBy('name', 'asc'),
-                    default => $query->orderBy('created_at', 'desc'),
-                };
-            }, function ($query) {
-                $query->orderBy('created_at', 'desc');
-            })
-            ->having('available_items_count', '>', 0)
-            ->paginate(12)
-            ->withQueryString();
+        $products = $getProductsAction->execute([
+            'search' => $request->search,
+            'category' => $request->category,
+            'min_price' => $request->min_price,
+            'max_price' => $request->max_price,
+            'sort' => $request->sort,
+            'per_page' => config('shop.pagination.products_per_page'),
+        ]);
 
         $categories = Category::active()
             ->with(['children' => function ($query) {
@@ -66,7 +39,7 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        if ($product->status !== 'active') {
+        if ($product->status !== \App\Enums\ProductStatus::ACTIVE->value) {
             abort(404);
         }
 
@@ -74,7 +47,9 @@ class ProductController extends Controller
             'category.parent',
             'seller:id,name',
             'reviews' => function ($query) {
-                $query->with('user:id,name')->latest()->limit(10);
+                $query->with('user:id,name')
+                    ->latest()
+                    ->limit(config('shop.pagination.reviews_per_product'));
             }
         ]);
         $product->loadCount('availableItems');
@@ -88,7 +63,7 @@ class ProductController extends Controller
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
             ->having('available_items_count', '>', 0)
-            ->limit(4)
+            ->limit(config('shop.pagination.related_products_limit'))
             ->get();
 
         return Inertia::render('Shop/Show', [

@@ -8,7 +8,9 @@
       "Bash(wsl docker compose exec:*)",
       "Bash(wsl docker compose:*)",
       "Bash(composer install:*)",
-      "Bash(wsl rm:*)"
+      "Bash(wsl rm:*)",
+      "Bash(php artisan:*)",
+      "Bash(wsl php artisan route:list:*)"
     ]
   }
 }

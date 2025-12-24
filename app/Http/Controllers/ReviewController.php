@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Review\StoreReviewRequest;
+use App\Http\Requests\Review\UpdateReviewRequest;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Review;
@@ -16,7 +18,7 @@ class ReviewController extends Controller
             ->reviews()
             ->with(['product', 'order'])
             ->latest()
-            ->paginate(10);
+            ->paginate(config('shop.pagination.reviews_per_page'));
 
         return Inertia::render('Reviews/Index', [
             'reviews' => $reviews,
@@ -31,7 +33,7 @@ class ReviewController extends Controller
         }
 
         // Check if order is completed
-        if ($order->status !== 'completed') {
+        if ($order->status !== \App\Enums\OrderStatus::COMPLETED->value) {
             return redirect()->back()->with('error', 'You can only review completed orders.');
         }
 
@@ -52,46 +54,22 @@ class ReviewController extends Controller
         ]);
     }
 
-    public function store(Request $request, Order $order, Product $product)
+    public function store(StoreReviewRequest $request, Order $order, Product $product)
     {
-        // Check if order belongs to user
-        if ($order->buyer_id !== auth()->id()) {
-            abort(403, 'Unauthorized');
+        try {
+            $action = new \App\Actions\Review\CreateReviewAction();
+            $action->execute([
+                'order' => $order,
+                'product' => $product,
+                'user' => auth()->user(),
+                ...$request->validated(),
+            ]);
+
+            return redirect()->route('orders.show', $order)
+                ->with('success', 'Review submitted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        // Check if order is completed
-        if ($order->status !== 'completed') {
-            return redirect()->back()->with('error', 'You can only review completed orders.');
-        }
-
-        // Check if already reviewed
-        $existingReview = Review::where([
-            'order_id' => $order->id,
-            'user_id' => auth()->id(),
-            'product_id' => $product->id,
-        ])->first();
-
-        if ($existingReview) {
-            return redirect()->back()->with('error', 'You have already reviewed this product.');
-        }
-
-        $validated = $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string|max:1000',
-        ]);
-
-        Review::create([
-            'order_id' => $order->id,
-            'user_id' => auth()->id(),
-            'product_id' => $product->id,
-            'seller_id' => $product->seller_id,
-            'rating' => $validated['rating'],
-            'comment' => $validated['comment'] ?? null,
-            'is_verified_purchase' => true,
-        ]);
-
-        return redirect()->route('orders.show', $order)
-            ->with('success', 'Review submitted successfully!');
     }
 
     public function edit(Review $review)
@@ -106,22 +84,9 @@ class ReviewController extends Controller
         ]);
     }
 
-    public function update(Request $request, Review $review)
+    public function update(UpdateReviewRequest $request, Review $review)
     {
-        // Check if review belongs to user
-        if ($review->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized');
-        }
-
-        $validated = $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string|max:1000',
-        ]);
-
-        $review->update([
-            'rating' => $validated['rating'],
-            'comment' => $validated['comment'] ?? null,
-        ]);
+        $review->update($request->validated());
 
         return redirect()->route('reviews.index')
             ->with('success', 'Review updated successfully!');
