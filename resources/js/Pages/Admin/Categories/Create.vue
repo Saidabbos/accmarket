@@ -1,12 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import InputError from '@/Components/InputError.vue';
-import Checkbox from '@/Components/Checkbox.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 
 const props = defineProps({
     parentCategories: Array,
@@ -28,93 +22,124 @@ const submit = () => {
 <template>
     <Head title="Create Category" />
 
-    <AuthenticatedLayout>
+    <AdminLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Create Category
-            </h2>
-        </template>
-
-        <div class="py-12">
-            <div class="mx-auto max-w-2xl sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <form @submit.prevent="submit" class="p-6 space-y-6">
-                        <!-- Name -->
-                        <div>
-                            <InputLabel for="name" value="Category Name" />
-                            <TextInput
-                                id="name"
-                                v-model="form.name"
-                                type="text"
-                                class="mt-1 block w-full"
-                                required
-                                autofocus
-                            />
-                            <InputError :message="form.errors.name" class="mt-2" />
-                        </div>
-
-                        <!-- Description -->
-                        <div>
-                            <InputLabel for="description" value="Description (Optional)" />
-                            <textarea
-                                id="description"
-                                v-model="form.description"
-                                rows="3"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="Brief description of this category..."
-                            ></textarea>
-                            <InputError :message="form.errors.description" class="mt-2" />
-                        </div>
-
-                        <!-- Parent Category -->
-                        <div>
-                            <InputLabel for="parent_id" value="Parent Category (Optional)" />
-                            <select
-                                id="parent_id"
-                                v-model="form.parent_id"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >
-                                <option value="">None (Top Level)</option>
-                                <option v-for="category in parentCategories" :key="category.id" :value="category.id">
-                                    {{ category.name }}
-                                </option>
-                            </select>
-                            <p class="mt-1 text-sm text-gray-500">Leave empty to create a top-level category.</p>
-                            <InputError :message="form.errors.parent_id" class="mt-2" />
-                        </div>
-
-                        <!-- Sort Order -->
-                        <div>
-                            <InputLabel for="sort_order" value="Sort Order" />
-                            <TextInput
-                                id="sort_order"
-                                v-model="form.sort_order"
-                                type="number"
-                                min="0"
-                                class="mt-1 block w-32"
-                            />
-                            <p class="mt-1 text-sm text-gray-500">Lower numbers appear first.</p>
-                            <InputError :message="form.errors.sort_order" class="mt-2" />
-                        </div>
-
-                        <!-- Is Active -->
-                        <div class="flex items-center">
-                            <Checkbox id="is_active" v-model:checked="form.is_active" />
-                            <InputLabel for="is_active" value="Active" class="ml-2" />
-                        </div>
-
-                        <!-- Submit -->
-                        <div class="flex justify-end space-x-3">
-                            <Link :href="route('admin.categories.index')">
-                                <SecondaryButton type="button">Cancel</SecondaryButton>
-                            </Link>
-                            <PrimaryButton :disabled="form.processing">
-                                {{ form.processing ? 'Creating...' : 'Create Category' }}
-                            </PrimaryButton>
-                        </div>
-                    </form>
+            <div class="flex items-center space-x-3">
+                <Link
+                    :href="route('admin.categories.index')"
+                    class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </Link>
+                <div>
+                    <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Create Category</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Add a new product category</p>
                 </div>
             </div>
+        </template>
+
+        <div class="max-w-2xl">
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                <form @submit.prevent="submit" class="space-y-6">
+                    <!-- Name -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Category Name
+                        </label>
+                        <input
+                            id="name"
+                            v-model="form.name"
+                            type="text"
+                            required
+                            autofocus
+                            class="w-full rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        />
+                        <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name }}</p>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Description <span class="text-gray-400">(Optional)</span>
+                        </label>
+                        <textarea
+                            id="description"
+                            v-model="form.description"
+                            rows="3"
+                            class="w-full rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            placeholder="Brief description of this category..."
+                        ></textarea>
+                        <p v-if="form.errors.description" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.description }}</p>
+                    </div>
+
+                    <!-- Parent Category -->
+                    <div>
+                        <label for="parent_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Parent Category <span class="text-gray-400">(Optional)</span>
+                        </label>
+                        <select
+                            id="parent_id"
+                            v-model="form.parent_id"
+                            class="w-full rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        >
+                            <option value="">None (Top Level)</option>
+                            <option v-for="category in parentCategories" :key="category.id" :value="category.id">
+                                {{ category.name }}
+                            </option>
+                        </select>
+                        <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Leave empty to create a top-level category.</p>
+                        <p v-if="form.errors.parent_id" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.parent_id }}</p>
+                    </div>
+
+                    <!-- Sort Order -->
+                    <div>
+                        <label for="sort_order" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Sort Order
+                        </label>
+                        <input
+                            id="sort_order"
+                            v-model="form.sort_order"
+                            type="number"
+                            min="0"
+                            class="w-32 rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        />
+                        <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Lower numbers appear first.</p>
+                        <p v-if="form.errors.sort_order" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.sort_order }}</p>
+                    </div>
+
+                    <!-- Is Active -->
+                    <div class="flex items-center">
+                        <input
+                            id="is_active"
+                            v-model="form.is_active"
+                            type="checkbox"
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+                        />
+                        <label for="is_active" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Active
+                        </label>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <Link
+                            :href="route('admin.categories.index')"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                            Cancel
+                        </Link>
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                        >
+                            {{ form.processing ? 'Creating...' : 'Create Category' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </AuthenticatedLayout>
+    </AdminLayout>
 </template>

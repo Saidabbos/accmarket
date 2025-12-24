@@ -1,12 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import InputError from '@/Components/InputError.vue';
-import Checkbox from '@/Components/Checkbox.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 
 const props = defineProps({
     category: Object,
@@ -29,109 +23,140 @@ const submit = () => {
 <template>
     <Head :title="`Edit: ${category.name}`" />
 
-    <AuthenticatedLayout>
+    <AdminLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Edit Category
-            </h2>
-        </template>
-
-        <div class="py-12">
-            <div class="mx-auto max-w-2xl sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <form @submit.prevent="submit" class="p-6 space-y-6">
-                        <!-- Category Info -->
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <span class="text-gray-500">Slug:</span>
-                                    <span class="ml-2 font-mono text-gray-900">{{ category.slug }}</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500">Products:</span>
-                                    <span class="ml-2 font-medium text-gray-900">{{ category.products_count || 0 }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Name -->
-                        <div>
-                            <InputLabel for="name" value="Category Name" />
-                            <TextInput
-                                id="name"
-                                v-model="form.name"
-                                type="text"
-                                class="mt-1 block w-full"
-                                required
-                            />
-                            <InputError :message="form.errors.name" class="mt-2" />
-                        </div>
-
-                        <!-- Description -->
-                        <div>
-                            <InputLabel for="description" value="Description (Optional)" />
-                            <textarea
-                                id="description"
-                                v-model="form.description"
-                                rows="3"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="Brief description of this category..."
-                            ></textarea>
-                            <InputError :message="form.errors.description" class="mt-2" />
-                        </div>
-
-                        <!-- Parent Category -->
-                        <div>
-                            <InputLabel for="parent_id" value="Parent Category" />
-                            <select
-                                id="parent_id"
-                                v-model="form.parent_id"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                :disabled="category.children_count > 0"
-                            >
-                                <option value="">None (Top Level)</option>
-                                <option v-for="parent in parentCategories" :key="parent.id" :value="parent.id">
-                                    {{ parent.name }}
-                                </option>
-                            </select>
-                            <p v-if="category.children_count > 0" class="mt-1 text-sm text-amber-600">
-                                Cannot change parent for categories with subcategories.
-                            </p>
-                            <InputError :message="form.errors.parent_id" class="mt-2" />
-                        </div>
-
-                        <!-- Sort Order -->
-                        <div>
-                            <InputLabel for="sort_order" value="Sort Order" />
-                            <TextInput
-                                id="sort_order"
-                                v-model="form.sort_order"
-                                type="number"
-                                min="0"
-                                class="mt-1 block w-32"
-                            />
-                            <p class="mt-1 text-sm text-gray-500">Lower numbers appear first.</p>
-                            <InputError :message="form.errors.sort_order" class="mt-2" />
-                        </div>
-
-                        <!-- Is Active -->
-                        <div class="flex items-center">
-                            <Checkbox id="is_active" v-model:checked="form.is_active" />
-                            <InputLabel for="is_active" value="Active" class="ml-2" />
-                        </div>
-
-                        <!-- Submit -->
-                        <div class="flex justify-end space-x-3">
-                            <Link :href="route('admin.categories.index')">
-                                <SecondaryButton type="button">Cancel</SecondaryButton>
-                            </Link>
-                            <PrimaryButton :disabled="form.processing">
-                                {{ form.processing ? 'Saving...' : 'Save Changes' }}
-                            </PrimaryButton>
-                        </div>
-                    </form>
+            <div class="flex items-center space-x-3">
+                <Link
+                    :href="route('admin.categories.index')"
+                    class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </Link>
+                <div>
+                    <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Edit Category</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ category.name }}</p>
                 </div>
             </div>
+        </template>
+
+        <div class="max-w-2xl">
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+                <form @submit.prevent="submit" class="space-y-6">
+                    <!-- Category Info -->
+                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">Slug:</span>
+                                <span class="ml-2 font-mono text-gray-900 dark:text-white">{{ category.slug }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">Products:</span>
+                                <span class="ml-2 font-medium text-gray-900 dark:text-white">{{ category.products_count || 0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Name -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Category Name
+                        </label>
+                        <input
+                            id="name"
+                            v-model="form.name"
+                            type="text"
+                            required
+                            class="w-full rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        />
+                        <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name }}</p>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Description <span class="text-gray-400">(Optional)</span>
+                        </label>
+                        <textarea
+                            id="description"
+                            v-model="form.description"
+                            rows="3"
+                            class="w-full rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            placeholder="Brief description of this category..."
+                        ></textarea>
+                        <p v-if="form.errors.description" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.description }}</p>
+                    </div>
+
+                    <!-- Parent Category -->
+                    <div>
+                        <label for="parent_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Parent Category
+                        </label>
+                        <select
+                            id="parent_id"
+                            v-model="form.parent_id"
+                            class="w-full rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:opacity-50"
+                            :disabled="category.children_count > 0"
+                        >
+                            <option value="">None (Top Level)</option>
+                            <option v-for="parent in parentCategories" :key="parent.id" :value="parent.id">
+                                {{ parent.name }}
+                            </option>
+                        </select>
+                        <p v-if="category.children_count > 0" class="mt-1.5 text-sm text-amber-600 dark:text-amber-400">
+                            Cannot change parent for categories with subcategories.
+                        </p>
+                        <p v-if="form.errors.parent_id" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.parent_id }}</p>
+                    </div>
+
+                    <!-- Sort Order -->
+                    <div>
+                        <label for="sort_order" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Sort Order
+                        </label>
+                        <input
+                            id="sort_order"
+                            v-model="form.sort_order"
+                            type="number"
+                            min="0"
+                            class="w-32 rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        />
+                        <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Lower numbers appear first.</p>
+                        <p v-if="form.errors.sort_order" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.sort_order }}</p>
+                    </div>
+
+                    <!-- Is Active -->
+                    <div class="flex items-center">
+                        <input
+                            id="is_active"
+                            v-model="form.is_active"
+                            type="checkbox"
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+                        />
+                        <label for="is_active" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Active
+                        </label>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <Link
+                            :href="route('admin.categories.index')"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                            Cancel
+                        </Link>
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                        >
+                            {{ form.processing ? 'Saving...' : 'Save Changes' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </AuthenticatedLayout>
+    </AdminLayout>
 </template>

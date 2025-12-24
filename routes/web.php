@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Shop\CartController;
@@ -93,6 +94,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('categories', AdminCategoryController::class)->except(['show']);
     Route::patch('categories/{category}/toggle', [AdminCategoryController::class, 'toggleStatus'])->name('categories.toggle');
+
+    // User management
+    Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('users/{user}', [AdminUserController::class, 'show'])->name('users.show');
+    Route::put('users/{user}/roles', [AdminUserController::class, 'updateRoles'])->name('users.roles');
+    Route::post('users/{user}/ban', [AdminUserController::class, 'ban'])->name('users.ban');
+    Route::post('users/{user}/unban', [AdminUserController::class, 'unban'])->name('users.unban');
 });
 
 require __DIR__.'/auth.php';

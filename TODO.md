@@ -152,10 +152,10 @@
 - [x] User statistics
 
 ### User Management
-- [ ] Admin user listing
-- [ ] Ban/activate users
-- [ ] View user activity
-- [ ] Edit user roles
+- [x] Admin user listing
+- [x] Ban/activate users
+- [x] View user activity
+- [x] Edit user roles
 
 ### Product Management (Admin)
 - [ ] View all products (any seller)
