@@ -77,6 +77,11 @@ class Order extends Model
         return $this->hasOne(Dispute::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function scopePending($query)
     {
         return $query->where('status', 'pending');

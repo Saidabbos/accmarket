@@ -46,6 +46,11 @@ class Product extends Model
         return $this->hasMany(Order::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function availableItems(): HasMany
     {
         return $this->hasMany(ProductItem::class)->where('status', 'available');
@@ -65,5 +70,15 @@ class Product extends Model
     {
         $this->stock_count = $this->availableItems()->count();
         $this->save();
+    }
+
+    public function averageRating(): float
+    {
+        return $this->reviews()->avg('rating') ?? 0;
+    }
+
+    public function reviewsCount(): int
+    {
+        return $this->reviews()->count();
     }
 }

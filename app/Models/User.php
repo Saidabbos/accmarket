@@ -76,4 +76,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(Dispute::class);
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function receivedReviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'seller_id');
+    }
+
+    public function sellerAverageRating(): float
+    {
+        return $this->receivedReviews()->avg('rating') ?? 0;
+    }
+
+    public function sellerReviewsCount(): int
+    {
+        return $this->receivedReviews()->count();
+    }
 }

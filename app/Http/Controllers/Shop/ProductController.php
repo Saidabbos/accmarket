@@ -15,6 +15,8 @@ class ProductController extends Controller
         $products = Product::active()
             ->with(['category', 'seller:id,name'])
             ->withCount('availableItems')
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -68,13 +70,23 @@ class ProductController extends Controller
             abort(404);
         }
 
-        $product->load(['category.parent', 'seller:id,name']);
+        $product->load([
+            'category.parent',
+            'seller:id,name',
+            'reviews' => function ($query) {
+                $query->with('user:id,name')->latest()->limit(10);
+            }
+        ]);
         $product->loadCount('availableItems');
+        $product->loadAvg('reviews', 'rating');
+        $product->loadCount('reviews');
 
         $relatedProducts = Product::active()
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->withCount('availableItems')
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
             ->having('available_items_count', '>', 0)
             ->limit(4)
             ->get();

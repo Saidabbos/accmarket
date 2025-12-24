@@ -1,16 +1,54 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, usePage, router } from '@inertiajs/vue3';
 
 const page = usePage();
 const mobileMenuOpen = ref(false);
 const darkMode = ref(false);
+const categoriesOpen = ref(false);
+const categories = ref([]);
 
 const user = computed(() => page.props.auth?.user);
 const isAdmin = computed(() => user.value?.roles?.some(r => r.name === 'admin'));
 const isSeller = computed(() => user.value?.roles?.some(r => r.name === 'seller' || r.name === 'admin'));
 
-onMounted(() => {
+const parentCategories = computed(() => {
+    return categories.value?.filter(cat => !cat.parent_id) || [];
+});
+
+const getChildCategories = (parentId) => {
+    return categories.value?.filter(cat => cat.parent_id === parentId) || [];
+};
+
+const getCategoryIcon = (categoryName) => {
+    const name = categoryName.toLowerCase();
+    if (name.includes('steam')) return '🎮';
+    if (name.includes('playstation') || name.includes('ps')) return '🎮';
+    if (name.includes('xbox')) return '🎮';
+    if (name.includes('epic') || name.includes('game')) return '🎮';
+    if (name.includes('netflix')) return '📺';
+    if (name.includes('spotify')) return '🎵';
+    if (name.includes('disney')) return '🎬';
+    if (name.includes('hbo') || name.includes('hulu')) return '📺';
+    if (name.includes('instagram')) return '📷';
+    if (name.includes('twitter') || name.includes('x')) return '🐦';
+    if (name.includes('tiktok')) return '🎵';
+    if (name.includes('facebook')) return '👥';
+    if (name.includes('linkedin')) return '💼';
+    if (name.includes('telegram')) return '✈️';
+    if (name.includes('windows')) return '🪟';
+    if (name.includes('office')) return '📄';
+    if (name.includes('antivirus')) return '🛡️';
+    if (name.includes('vpn')) return '🔒';
+    if (name.includes('gift') || name.includes('card')) return '🎁';
+    if (name.includes('amazon')) return '📦';
+    if (name.includes('itunes') || name.includes('apple')) return '🍎';
+    if (name.includes('google')) return '🔍';
+    return '📦';
+};
+
+onMounted(async () => {
+    // Load dark mode
     const savedMode = localStorage.getItem('darkMode');
     if (savedMode !== null) {
         darkMode.value = savedMode === 'true';
@@ -18,6 +56,16 @@ onMounted(() => {
         darkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
     applyDarkMode();
+
+    // Fetch categories
+    try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+            categories.value = await response.json();
+        }
+    } catch (error) {
+        console.error('Failed to fetch categories:', error);
+    }
 });
 
 watch(darkMode, () => {
@@ -64,6 +112,70 @@ const toggleDarkMode = () => {
                             >
                                 Shop
                             </Link>
+
+                            <!-- Categories Dropdown -->
+                            <div class="relative" @mouseleave="categoriesOpen = false">
+                                <button
+                                    @mouseenter="categoriesOpen = true"
+                                    class="px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+                                >
+                                    Categories
+                                    <svg
+                                        class="w-4 h-4 transition-transform"
+                                        :class="categoriesOpen ? 'rotate-180' : ''"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                <!-- Mega Menu Dropdown -->
+                                <div
+                                    v-if="categoriesOpen"
+                                    @mouseenter="categoriesOpen = true"
+                                    class="absolute left-0 top-full mt-1 w-screen max-w-4xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50"
+                                >
+                                    <div class="p-6">
+                                        <div class="grid grid-cols-3 gap-6">
+                                            <div v-for="parent in parentCategories.slice(0, 6)" :key="parent.id">
+                                                <div class="flex items-center gap-2 mb-3">
+                                                    <span class="text-lg">{{ getCategoryIcon(parent.name) }}</span>
+                                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+                                                        {{ parent.name }}
+                                                    </h3>
+                                                </div>
+                                                <ul class="space-y-2">
+                                                    <li v-for="child in getChildCategories(parent.id)" :key="child.id">
+                                                        <Link
+                                                            :href="route('shop.index', { category: child.slug })"
+                                                            class="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors block"
+                                                            @click="categoriesOpen = false"
+                                                        >
+                                                            {{ child.name }}
+                                                        </Link>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <!-- View All Categories Link -->
+                                        <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                                            <Link
+                                                :href="route('shop.index')"
+                                                class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1"
+                                                @click="categoriesOpen = false"
+                                            >
+                                                View all products
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <template v-if="user">
                                 <Link
                                     :href="route('orders.index')"

@@ -16,16 +16,34 @@ use App\Http\Controllers\Shop\DownloadController;
 use App\Http\Controllers\Shop\PaymentController;
 use App\Http\Controllers\Shop\ProductController as ShopProductController;
 use App\Http\Controllers\Shop\SellerController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    $categoriesWithProducts = \App\Models\Category::active()
+        ->whereNotNull('parent_id')
+        ->with(['products' => function ($query) {
+            $query->where('status', 'active')
+                ->where('stock_count', '>', 0)
+                ->withAvg('reviews', 'rating')
+                ->withCount('reviews')
+                ->orderBy('created_at', 'desc')
+                ->limit(6);
+        }])
+        ->get()
+        ->filter(function ($category) {
+            return $category->products->isNotEmpty();
+        })
+        ->values();
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'categoriesWithProducts' => $categoriesWithProducts,
     ]);
 });
 
@@ -83,6 +101,16 @@ Route::middleware(['auth', 'verified'])->prefix('disputes')->name('disputes.')->
     Route::get('/order/{order}/create', [DisputeController::class, 'create'])->name('create');
     Route::post('/order/{order}', [DisputeController::class, 'store'])->name('store');
     Route::get('/{dispute}', [DisputeController::class, 'show'])->name('show');
+});
+
+// Review routes (authenticated)
+Route::middleware(['auth', 'verified'])->prefix('reviews')->name('reviews.')->group(function () {
+    Route::get('/', [ReviewController::class, 'index'])->name('index');
+    Route::get('/order/{order}/product/{product}/create', [ReviewController::class, 'create'])->name('create');
+    Route::post('/order/{order}/product/{product}', [ReviewController::class, 'store'])->name('store');
+    Route::get('/{review}/edit', [ReviewController::class, 'edit'])->name('edit');
+    Route::put('/{review}', [ReviewController::class, 'update'])->name('update');
+    Route::delete('/{review}', [ReviewController::class, 'destroy'])->name('destroy');
 });
 
 // Download routes (authenticated, signed URLs)

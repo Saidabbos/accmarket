@@ -1,10 +1,12 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
+import StarRating from '@/Components/StarRating.vue';
 
 defineProps({
     canLogin: Boolean,
     canRegister: Boolean,
+    categoriesWithProducts: Array,
 });
 
 const darkMode = ref(false);
@@ -166,6 +168,92 @@ const features = [
                     <div class="text-center">
                         <div class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">24/7</div>
                         <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">Support</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products by Category Section -->
+        <section v-if="categoriesWithProducts && categoriesWithProducts.length > 0" class="py-20 px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                        Browse Products
+                    </h2>
+                    <Link
+                        :href="route('shop.index')"
+                        class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 transition-colors"
+                    >
+                        View all
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </Link>
+                </div>
+
+                <div class="space-y-12">
+                    <div v-for="category in categoriesWithProducts" :key="category.id" class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                {{ category.name }}
+                            </h3>
+                            <Link
+                                :href="route('shop.index', { category: category.id })"
+                                class="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                            >
+                                See all →
+                            </Link>
+                        </div>
+
+                        <div class="space-y-2">
+                            <Link
+                                v-for="product in category.products"
+                                :key="product.id"
+                                :href="route('shop.product', product.slug)"
+                                class="group block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all hover:shadow-md"
+                            >
+                                <div class="flex items-center gap-4 p-3">
+                                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                        </svg>
+                                    </div>
+
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-medium text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                            {{ product.name }}
+                                        </h4>
+                                        <div class="flex items-center gap-3 mt-1">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                {{ category.name }}
+                                            </span>
+                                            <StarRating
+                                                :rating="product.reviews_avg_rating || 0"
+                                                :reviews-count="product.reviews_count || 0"
+                                                size="xs"
+                                            />
+                                            <span class="text-xs text-green-600 dark:text-green-400">
+                                                {{ product.stock_count }} in stock
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-3 flex-shrink-0">
+                                        <div class="text-right">
+                                            <div class="text-lg font-bold text-gray-900 dark:text-white">
+                                                ${{ product.price }}
+                                            </div>
+                                        </div>
+                                        <button
+                                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+                                            @click.prevent="() => {}"
+                                        >
+                                            View
+                                        </button>
+                                    </div>
+                                </div>
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

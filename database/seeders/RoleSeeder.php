@@ -12,9 +12,9 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create roles
-        \Spatie\Permission\Models\Role::create(['name' => 'admin', 'guard_name' => 'web']);
-        \Spatie\Permission\Models\Role::create(['name' => 'seller', 'guard_name' => 'web']);
-        \Spatie\Permission\Models\Role::create(['name' => 'buyer', 'guard_name' => 'web']);
+        // Create roles (use firstOrCreate to avoid duplicates)
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'seller', 'guard_name' => 'web']);
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'buyer', 'guard_name' => 'web']);
     }
 }

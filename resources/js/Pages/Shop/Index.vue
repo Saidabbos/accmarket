@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import StarRating from '@/Components/StarRating.vue';
 import debounce from 'lodash/debounce';
 
 const props = defineProps({
@@ -62,150 +63,140 @@ const addToCart = (product) => {
                     <p class="mt-2 text-gray-600 dark:text-gray-400">Browse our collection of digital products</p>
                 </div>
 
-                <div class="flex flex-col lg:flex-row gap-8">
-                    <!-- Sidebar Filters -->
-                    <aside class="w-full lg:w-64 flex-shrink-0">
-                        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5 sticky top-24">
-                            <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                </svg>
-                                Filters
-                            </h2>
-
-                            <!-- Search -->
-                            <div class="mb-5">
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Search</label>
-                                <div class="relative">
-                                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                    <input
-                                        v-model="search"
-                                        type="text"
-                                        placeholder="Search products..."
-                                        class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
-                                    />
+                <!-- Product List -->
+                <div>
+                        <!-- Filters Bar -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 mb-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <!-- Search -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Search</label>
+                                    <div class="relative">
+                                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        <input
+                                            v-model="search"
+                                            type="text"
+                                            placeholder="Search..."
+                                            class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Category -->
-                            <div class="mb-5">
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Category</label>
-                                <select
-                                    v-model="category"
-                                    @change="applyFilters"
-                                    class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
-                                >
-                                    <option value="">All Categories</option>
-                                    <template v-for="cat in categories" :key="cat.id">
-                                        <option :value="cat.slug" class="font-medium">{{ cat.name }}</option>
-                                        <option
-                                            v-for="child in cat.children"
-                                            :key="child.id"
-                                            :value="child.slug"
-                                        >
-                                            &nbsp;&nbsp;{{ child.name }}
-                                        </option>
-                                    </template>
-                                </select>
-                            </div>
-
-                            <!-- Price Range -->
-                            <div class="mb-5">
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Price Range</label>
-                                <div class="flex items-center space-x-2">
+                                <!-- Price Min -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Min Price</label>
                                     <input
                                         v-model="minPrice"
                                         type="number"
-                                        placeholder="Min"
+                                        placeholder="$0"
                                         min="0"
-                                        class="w-1/2 text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
-                                        @change="applyFilters"
-                                    />
-                                    <span class="text-gray-400">-</span>
-                                    <input
-                                        v-model="maxPrice"
-                                        type="number"
-                                        placeholder="Max"
-                                        min="0"
-                                        class="w-1/2 text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                         @change="applyFilters"
                                     />
                                 </div>
+
+                                <!-- Price Max -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Max Price</label>
+                                    <input
+                                        v-model="maxPrice"
+                                        type="number"
+                                        placeholder="Any"
+                                        min="0"
+                                        class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                                        @change="applyFilters"
+                                    />
+                                </div>
+
+                                <!-- Sort -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Sort By</label>
+                                    <select
+                                        v-model="sort"
+                                        @change="applyFilters"
+                                        class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                        <option value="newest">Newest First</option>
+                                        <option value="price_asc">Price: Low to High</option>
+                                        <option value="price_desc">Price: High to Low</option>
+                                        <option value="name">Name A-Z</option>
+                                    </select>
+                                </div>
                             </div>
 
-                            <!-- Sort -->
-                            <div class="mb-5">
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Sort By</label>
-                                <select
-                                    v-model="sort"
-                                    @change="applyFilters"
-                                    class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                            <!-- Active Filters & Clear -->
+                            <div v-if="search || category || minPrice || maxPrice || sort !== 'newest'" class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Active filters:</span>
+                                    <span v-if="search" class="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-xs font-medium text-indigo-700 dark:text-indigo-300">
+                                        Search: "{{ search }}"
+                                    </span>
+                                    <span v-if="minPrice" class="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-xs font-medium text-indigo-700 dark:text-indigo-300">
+                                        Min: ${{ minPrice }}
+                                    </span>
+                                    <span v-if="maxPrice" class="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-xs font-medium text-indigo-700 dark:text-indigo-300">
+                                        Max: ${{ maxPrice }}
+                                    </span>
+                                </div>
+                                <button
+                                    @click="clearFilters"
+                                    class="text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                                 >
-                                    <option value="newest">Newest First</option>
-                                    <option value="price_asc">Price: Low to High</option>
-                                    <option value="price_desc">Price: High to Low</option>
-                                    <option value="name">Name A-Z</option>
-                                </select>
+                                    Clear All
+                                </button>
                             </div>
-
-                            <button
-                                @click="clearFilters"
-                                class="w-full text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                            >
-                                Clear All Filters
-                            </button>
                         </div>
-                    </aside>
 
-                    <!-- Product Grid -->
-                    <main class="flex-1">
-                        <div v-if="products.data.length > 0" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                        <!-- Product List -->
+                        <div v-if="products.data.length > 0" class="space-y-2">
                             <div
                                 v-for="product in products.data"
                                 :key="product.id"
-                                class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-200"
+                                class="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors"
                             >
-                                <Link :href="route('shop.product', product.id)" class="block">
-                                    <div class="h-40 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 flex items-center justify-center relative overflow-hidden">
-                                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center transform group-hover:scale-110 transition-transform duration-200">
-                                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                <div class="flex items-center gap-4 p-3">
+                                    <!-- Product Icon -->
+                                    <Link :href="route('shop.product', product.id)" class="flex-shrink-0">
+                                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                             </svg>
                                         </div>
-                                        <div class="absolute top-3 right-3">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
-                                                {{ product.available_items_count }} left
-                                            </span>
-                                        </div>
-                                    </div>
-                                </Link>
-                                <div class="p-4">
-                                    <div class="flex items-start justify-between mb-2">
-                                        <Link :href="route('shop.product', product.id)" class="block flex-1">
-                                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
+                                    </Link>
+
+                                    <!-- Product Info -->
+                                    <div class="flex-1 min-w-0">
+                                        <Link :href="route('shop.product', product.id)">
+                                            <h3 class="font-medium text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                                 {{ product.name }}
                                             </h3>
                                         </Link>
+                                        <div class="flex items-center gap-3 mt-1">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                {{ product.category?.name }}
+                                            </span>
+                                            <StarRating
+                                                :rating="product.reviews_avg_rating || 0"
+                                                :reviews-count="product.reviews_count || 0"
+                                                size="xs"
+                                            />
+                                            <span class="text-xs text-emerald-600 dark:text-emerald-400">
+                                                {{ product.available_items_count }} in stock
+                                            </span>
+                                        </div>
                                     </div>
-                                    <p class="text-xs text-indigo-600 dark:text-indigo-400 mb-2">
-                                        {{ product.category?.name }}
-                                    </p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">
-                                        {{ product.description?.substring(0, 80) }}{{ product.description?.length > 80 ? '...' : '' }}
-                                    </p>
-                                    <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
-                                        <span class="text-lg font-bold text-gray-900 dark:text-white">
+
+                                    <!-- Price & Actions -->
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-lg font-bold text-gray-900 dark:text-white">
                                             ${{ parseFloat(product.price).toFixed(2) }}
-                                        </span>
+                                        </div>
                                         <button
                                             @click.prevent="addToCart(product)"
-                                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+                                            class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors"
                                         >
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                            </svg>
                                             Add
                                         </button>
                                     </div>
@@ -251,7 +242,6 @@ const addToCart = (product) => {
                                 </template>
                             </div>
                         </div>
-                    </main>
                 </div>
             </div>
         </div>

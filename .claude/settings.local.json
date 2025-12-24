@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(wsl docker compose exec:*)",
+      "Bash(wsl docker compose:*)",
+      "Bash(composer install:*)",
+      "Bash(wsl rm:*)"
+    ]
+  }
+}

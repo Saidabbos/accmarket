@@ -19,25 +19,40 @@ class DatabaseSeeder extends Seeder
         $this->call(RoleSeeder::class);
 
         // Create a test user with buyer role
-        $user = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-        $user->assignRole('buyer');
+        $user = User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => bcrypt('password'),
+            ]
+        );
+        if (!$user->hasRole('buyer')) {
+            $user->assignRole('buyer');
+        }
 
         // Create an admin user
-        $admin = User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-        ]);
-        $admin->assignRole('admin');
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => bcrypt('password'),
+            ]
+        );
+        if (!$admin->hasRole('admin')) {
+            $admin->assignRole('admin');
+        }
 
         // Create a seller user
-        $seller = User::factory()->create([
-            'name' => 'Seller User',
-            'email' => 'seller@example.com',
-        ]);
-        $seller->assignRole('seller');
+        $seller = User::firstOrCreate(
+            ['email' => 'seller@example.com'],
+            [
+                'name' => 'Seller User',
+                'password' => bcrypt('password'),
+            ]
+        );
+        if (!$seller->hasRole('seller')) {
+            $seller->assignRole('seller');
+        }
 
         // Seed categories and products
         $this->call([

@@ -195,10 +195,13 @@
 - [x] Dispute created
 - [x] Dispute resolved
 
-### Reviews & Ratings (Future)
-- [ ] Add rating to orders
-- [ ] Display product ratings
-- [ ] Seller reputation system
+### Reviews & Ratings
+- [x] Add rating to orders
+- [x] Display product ratings
+- [x] Seller reputation system
+- [x] Review submission form
+- [x] Star rating component
+- [x] Product detail page reviews section
 
 ### Search & Filtering (Future)
 - [ ] Full-text search

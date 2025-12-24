@@ -48,24 +48,28 @@ class CategorySeeder extends Seeder
 
         $sortOrder = 0;
         foreach ($categories as $parentName => $children) {
-            $parent = Category::create([
-                'name' => $parentName,
-                'slug' => Str::slug($parentName),
-                'description' => "Browse our collection of {$parentName}",
-                'parent_id' => null,
-                'sort_order' => $sortOrder++,
-                'is_active' => true,
-            ]);
-
-            foreach ($children as $childName) {
-                Category::create([
-                    'name' => $childName,
-                    'slug' => Str::slug($childName),
-                    'description' => "High quality {$childName} available",
-                    'parent_id' => $parent->id,
+            $parent = Category::firstOrCreate(
+                ['slug' => Str::slug($parentName)],
+                [
+                    'name' => $parentName,
+                    'description' => "Browse our collection of {$parentName}",
+                    'parent_id' => null,
                     'sort_order' => $sortOrder++,
                     'is_active' => true,
-                ]);
+                ]
+            );
+
+            foreach ($children as $childName) {
+                Category::firstOrCreate(
+                    ['slug' => Str::slug($childName)],
+                    [
+                        'name' => $childName,
+                        'description' => "High quality {$childName} available",
+                        'parent_id' => $parent->id,
+                        'sort_order' => $sortOrder++,
+                        'is_active' => true,
+                    ]
+                );
             }
         }
     }
