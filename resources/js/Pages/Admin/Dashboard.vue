@@ -33,6 +33,7 @@ const props = defineProps({
     stats: Object,
     revenueChart: Object,
     topProducts: Array,
+    topSellers: Array,
     recentOrders: Array,
     userStats: Object,
 });
@@ -337,7 +338,7 @@ const userRoleChartOptions = {
         </div>
 
         <!-- Bottom Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Top Products -->
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="p-6 border-b border-gray-100 dark:border-gray-700">
@@ -358,6 +359,30 @@ const userRoleChartOptions = {
                     </div>
                     <div v-if="topProducts.length === 0" class="p-8 text-center text-gray-500 dark:text-gray-400">
                         No sales data yet
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Sellers -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Top Sellers</h3>
+                </div>
+                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <div v-for="(seller, index) in topSellers.slice(0, 5)" :key="seller.id" class="p-4 flex items-center space-x-4">
+                        <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <span class="text-sm font-medium text-white">{{ seller.name.charAt(0).toUpperCase() }}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ seller.name }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ seller.products_count }} products, {{ seller.sales_count }} sales</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ formatCurrency(seller.total_revenue) }}</p>
+                        </div>
+                    </div>
+                    <div v-if="topSellers.length === 0" class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        No seller data yet
                     </div>
                 </div>
             </div>

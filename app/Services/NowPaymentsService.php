@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Mail\OrderCompleted;
+use App\Mail\OrderConfirmation;
 use App\Models\Order;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class NowPaymentsService
 {
@@ -156,6 +159,13 @@ class NowPaymentsService
 
         // Auto-complete order for digital goods
         $order->markAsCompleted();
+
+        // Send confirmation email
+        $order->load(['items.productItem.product', 'buyer']);
+        if ($order->buyer) {
+            Mail::to($order->buyer)->send(new OrderConfirmation($order));
+            Mail::to($order->buyer)->send(new OrderCompleted($order));
+        }
 
         Log::info('Payment completed', ['order_id' => $order->id]);
     }

@@ -2,15 +2,20 @@
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\DisputeController as AdminDisputeController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
+use App\Http\Controllers\Shop\DisputeController;
 use App\Http\Controllers\Shop\DownloadController;
 use App\Http\Controllers\Shop\PaymentController;
 use App\Http\Controllers\Shop\ProductController as ShopProductController;
+use App\Http\Controllers\Shop\SellerController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -38,6 +43,8 @@ Route::middleware('auth')->group(function () {
 Route::prefix('shop')->name('shop.')->group(function () {
     Route::get('/', [ShopProductController::class, 'index'])->name('index');
     Route::get('/product/{product}', [ShopProductController::class, 'show'])->name('product');
+    Route::get('/seller/{seller}', [SellerController::class, 'show'])->name('seller');
+    Route::get('/seller/{seller}/products', [SellerController::class, 'products'])->name('seller.products');
 });
 
 // Cart routes
@@ -68,6 +75,14 @@ Route::middleware(['auth', 'verified'])->prefix('payment')->name('payment.')->gr
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders', [PaymentController::class, 'orders'])->name('orders.index');
     Route::get('/orders/{order}', [PaymentController::class, 'orderShow'])->name('orders.show');
+});
+
+// Dispute routes (authenticated)
+Route::middleware(['auth', 'verified'])->prefix('disputes')->name('disputes.')->group(function () {
+    Route::get('/', [DisputeController::class, 'index'])->name('index');
+    Route::get('/order/{order}/create', [DisputeController::class, 'create'])->name('create');
+    Route::post('/order/{order}', [DisputeController::class, 'store'])->name('store');
+    Route::get('/{dispute}', [DisputeController::class, 'show'])->name('show');
 });
 
 // Download routes (authenticated, signed URLs)
@@ -111,6 +126,25 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::delete('products/{product}', [AdminProductController::class, 'destroy'])->name('products.destroy');
     Route::patch('products/{product}/status', [AdminProductController::class, 'toggleStatus'])->name('products.status');
     Route::patch('products/{product}/featured', [AdminProductController::class, 'toggleFeatured'])->name('products.featured');
+
+    // Order management
+    Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
+
+    // Reports & Exports
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('orders', [AdminReportController::class, 'exportOrders'])->name('orders');
+        Route::get('products', [AdminReportController::class, 'exportProducts'])->name('products');
+        Route::get('users', [AdminReportController::class, 'exportUsers'])->name('users');
+        Route::get('revenue', [AdminReportController::class, 'exportRevenue'])->name('revenue');
+    });
+
+    // Dispute management
+    Route::get('disputes', [AdminDisputeController::class, 'index'])->name('disputes.index');
+    Route::get('disputes/{dispute}', [AdminDisputeController::class, 'show'])->name('disputes.show');
+    Route::patch('disputes/{dispute}/status', [AdminDisputeController::class, 'updateStatus'])->name('disputes.status');
+    Route::post('disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
 });
 
 require __DIR__.'/auth.php';

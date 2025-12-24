@@ -18,6 +18,7 @@ class DashboardController extends Controller
             'stats' => $this->getStats(),
             'revenueChart' => $this->getRevenueChart(),
             'topProducts' => $this->getTopProducts(),
+            'topSellers' => $this->getTopSellers(),
             'recentOrders' => $this->getRecentOrders(),
             'userStats' => $this->getUserStats(),
         ]);
@@ -194,5 +195,35 @@ class DashboardController extends Controller
                 'data' => $days->map(fn ($d) => (int) ($registrations[$d] ?? 0))->toArray(),
             ],
         ];
+    }
+
+    private function getTopSellers(): array
+    {
+        return User::select('users.id', 'users.name', 'users.email')
+            ->selectRaw('COUNT(DISTINCT products.id) as products_count')
+            ->selectRaw('COUNT(order_items.id) as sales_count')
+            ->selectRaw('COALESCE(SUM(order_items.price), 0) as total_revenue')
+            ->join('products', 'users.id', '=', 'products.seller_id')
+            ->leftJoin('order_items', 'products.id', '=', 'order_items.product_id')
+            ->leftJoin('orders', function ($join) {
+                $join->on('order_items.order_id', '=', 'orders.id')
+                    ->where(function ($q) {
+                        $q->where('orders.payment_status', 'paid')
+                          ->orWhere('orders.status', 'completed');
+                    });
+            })
+            ->groupBy('users.id', 'users.name', 'users.email')
+            ->orderByDesc('total_revenue')
+            ->limit(5)
+            ->get()
+            ->map(fn ($seller) => [
+                'id' => $seller->id,
+                'name' => $seller->name,
+                'email' => $seller->email,
+                'products_count' => (int) $seller->products_count,
+                'sales_count' => (int) $seller->sales_count,
+                'total_revenue' => (float) $seller->total_revenue,
+            ])
+            ->toArray();
     }
 }

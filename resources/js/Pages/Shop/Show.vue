@@ -102,7 +102,15 @@ const breadcrumbs = () => {
                             </h1>
 
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                                Sold by <span class="font-medium text-gray-700 dark:text-gray-300">{{ product.seller?.name }}</span>
+                                Sold by
+                                <Link
+                                    v-if="product.seller"
+                                    :href="route('shop.seller', product.seller.id)"
+                                    class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
+                                >
+                                    {{ product.seller.name }}
+                                </Link>
+                                <span v-else class="font-medium text-gray-700 dark:text-gray-300">Unknown</span>
                             </p>
 
                             <div class="text-3xl font-bold text-gray-900 dark:text-white mb-6">

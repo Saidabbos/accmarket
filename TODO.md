@@ -164,36 +164,45 @@
 - [x] View product statistics
 
 ### Analytics
-- [ ] Revenue charts
-- [ ] Sales trends
-- [ ] Top selling products
-- [ ] Top sellers
-- [ ] Export reports (CSV)
+- [x] Revenue charts
+- [x] Sales trends
+- [x] Top selling products
+- [x] Top sellers
+- [x] Export reports (CSV)
+
+### Order Management (Admin)
+- [x] View all orders
+- [x] Order detail page
+- [x] Update order status
+- [x] Order search and filtering
 
 ### Dispute & Refund System
-- [ ] Dispute form in order detail
-- [ ] Admin dispute management
-- [ ] Dispute listing and filtering
-- [ ] Refund processing
-- [ ] Return ProductItems to 'available' status
-- [ ] Dispute notifications via email
+- [x] Dispute form in order detail
+- [x] Admin dispute management
+- [x] Dispute listing and filtering
+- [x] Refund processing
+- [x] Return ProductItems to 'available' status
+- [x] Dispute notifications via email
 
-### Reviews & Ratings
+### Seller Profile Pages
+- [x] Seller profile page with stats
+- [x] Seller products listing
+- [x] Link from product detail to seller
+
+### Email Notifications
+- [x] Order confirmation
+- [x] Payment received / Order completed
+- [x] Dispute created
+- [x] Dispute resolved
+
+### Reviews & Ratings (Future)
 - [ ] Add rating to orders
 - [ ] Display product ratings
 - [ ] Seller reputation system
 
-### Search & Filtering
+### Search & Filtering (Future)
 - [ ] Full-text search
 - [ ] Rating filtering
-- [ ] Seller profile pages
-
-### Email Notifications
-- [ ] Order confirmation
-- [ ] Payment received
-- [ ] Dispute created
-- [ ] Dispute resolved
-- [ ] New product notification (for followed sellers)
 
 ---
 

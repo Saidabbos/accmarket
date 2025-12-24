@@ -41,6 +41,12 @@ const navigation = [
         current: route().current('admin.dashboard')
     },
     {
+        name: 'Orders',
+        href: route('admin.orders.index'),
+        icon: 'orders',
+        current: route().current('admin.orders.*')
+    },
+    {
         name: 'Users',
         href: route('admin.users.index'),
         icon: 'users',
@@ -57,6 +63,12 @@ const navigation = [
         href: route('admin.categories.index'),
         icon: 'categories',
         current: route().current('admin.categories.*')
+    },
+    {
+        name: 'Disputes',
+        href: route('admin.disputes.index'),
+        icon: 'disputes',
+        current: route().current('admin.disputes.*')
     },
 ];
 
@@ -119,6 +131,10 @@ const quickLinks = [
                         <svg v-if="item.icon === 'dashboard'" class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 13a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-6z" />
                         </svg>
+                        <!-- Orders Icon -->
+                        <svg v-if="item.icon === 'orders'" class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
                         <!-- Users Icon -->
                         <svg v-if="item.icon === 'users'" class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -130,6 +146,10 @@ const quickLinks = [
                         <!-- Categories Icon -->
                         <svg v-if="item.icon === 'categories'" class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <!-- Disputes Icon -->
+                        <svg v-if="item.icon === 'disputes'" class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         {{ item.name }}
                     </Link>
