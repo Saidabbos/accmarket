@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
+use App\Http\Controllers\Shop\DownloadController;
 use App\Http\Controllers\Shop\PaymentController;
 use App\Http\Controllers\Shop\ProductController as ShopProductController;
 use Illuminate\Foundation\Application;
@@ -65,6 +66,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders', [PaymentController::class, 'orders'])->name('orders.index');
     Route::get('/orders/{order}', [PaymentController::class, 'orderShow'])->name('orders.show');
 });
+
+// Download routes (authenticated, signed URLs)
+Route::middleware(['auth', 'verified'])->prefix('download')->name('download.')->group(function () {
+    Route::get('/order/{order}/item/{orderItem}/link', [DownloadController::class, 'generateDownloadLink'])->name('link');
+    Route::get('/order/{order}/all/link', [DownloadController::class, 'generateBulkDownloadLink'])->name('all.link');
+});
+
+// Signed download routes (no auth middleware - verified by signature)
+Route::get('/download/order/{order}/item/{orderItem}', [DownloadController::class, 'downloadFile'])->name('download.file');
+Route::get('/download/order/{order}/all', [DownloadController::class, 'downloadAll'])->name('download.all');
 
 // IPN webhook (no auth - external callback)
 Route::post('/payment/ipn', [PaymentController::class, 'ipn'])->name('payment.ipn');

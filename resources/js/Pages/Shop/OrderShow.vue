@@ -1,10 +1,15 @@
 <script setup>
+import { ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
     order: Object,
 });
+
+const downloadingItem = ref(null);
+const downloadingAll = ref(false);
+const copiedItemId = ref(null);
 
 const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -28,8 +33,46 @@ const getStatusColor = (status) => {
     return colors[status] || 'bg-gray-100 text-gray-800';
 };
 
-const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
+const copyToClipboard = async (text, itemId) => {
+    await navigator.clipboard.writeText(text);
+    copiedItemId.value = itemId;
+    setTimeout(() => {
+        copiedItemId.value = null;
+    }, 2000);
+};
+
+const downloadItem = async (item) => {
+    downloadingItem.value = item.id;
+    try {
+        const response = await fetch(route('download.link', { order: props.order.id, orderItem: item.id }));
+        const data = await response.json();
+        if (data.download_url) {
+            window.location.href = data.download_url;
+        }
+    } catch (error) {
+        console.error('Download failed:', error);
+    } finally {
+        setTimeout(() => {
+            downloadingItem.value = null;
+        }, 1000);
+    }
+};
+
+const downloadAll = async () => {
+    downloadingAll.value = true;
+    try {
+        const response = await fetch(route('download.all.link', { order: props.order.id }));
+        const data = await response.json();
+        if (data.download_url) {
+            window.location.href = data.download_url;
+        }
+    } catch (error) {
+        console.error('Download failed:', error);
+    } finally {
+        setTimeout(() => {
+            downloadingAll.value = false;
+        }, 1000);
+    }
 };
 </script>
 
@@ -82,8 +125,23 @@ const copyToClipboard = (text) => {
 
                         <!-- Order Items -->
                         <div class="bg-white rounded-lg shadow overflow-hidden">
-                            <div class="p-6 border-b">
+                            <div class="p-6 border-b flex justify-between items-center">
                                 <h3 class="text-lg font-semibold text-gray-900">Order Items</h3>
+                                <button
+                                    v-if="order.status === 'completed'"
+                                    @click="downloadAll"
+                                    :disabled="downloadingAll"
+                                    class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                                >
+                                    <svg v-if="!downloadingAll" class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    <svg v-else class="w-4 h-4 mr-1.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    {{ downloadingAll ? 'Downloading...' : 'Download All' }}
+                                </button>
                             </div>
                             <div class="divide-y divide-gray-200">
                                 <div
@@ -111,12 +169,28 @@ const copyToClipboard = (text) => {
                                             >
                                                 <div class="flex justify-between items-center mb-2">
                                                     <span class="text-sm font-medium text-gray-700">Your Item:</span>
-                                                    <button
-                                                        @click="copyToClipboard(item.product_item.content)"
-                                                        class="text-sm text-indigo-600 hover:text-indigo-800"
-                                                    >
-                                                        Copy
-                                                    </button>
+                                                    <div class="flex items-center space-x-2">
+                                                        <button
+                                                            @click="copyToClipboard(item.product_item.content, item.id)"
+                                                            class="text-sm text-indigo-600 hover:text-indigo-800"
+                                                        >
+                                                            {{ copiedItemId === item.id ? 'Copied!' : 'Copy' }}
+                                                        </button>
+                                                        <button
+                                                            @click="downloadItem(item)"
+                                                            :disabled="downloadingItem === item.id"
+                                                            class="inline-flex items-center text-sm text-green-600 hover:text-green-800 disabled:opacity-50"
+                                                        >
+                                                            <svg v-if="downloadingItem !== item.id" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                            </svg>
+                                                            <svg v-else class="w-4 h-4 mr-1 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                            </svg>
+                                                            Download
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 <pre class="text-sm text-gray-600 whitespace-pre-wrap break-all bg-white p-3 rounded border">{{ item.product_item.content }}</pre>
                                             </div>
