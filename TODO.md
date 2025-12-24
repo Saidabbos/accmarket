@@ -145,11 +145,11 @@
 ## Future Enhancements (Nice to Have)
 
 ### Admin Dashboard
-- [ ] Sales overview
-- [ ] Revenue charts
-- [ ] Top products widget
-- [ ] Recent orders widget
-- [ ] User statistics
+- [x] Sales overview
+- [x] Revenue charts
+- [x] Top products widget
+- [x] Recent orders widget
+- [x] User statistics
 
 ### User Management
 - [ ] Admin user listing

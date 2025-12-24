@@ -60,6 +60,13 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
                                 <NavLink
                                     v-if="$page.props.auth.user.roles?.some(r => r.name === 'admin')"
+                                    :href="route('admin.dashboard')"
+                                    :active="route().current('admin.dashboard')"
+                                >
+                                    Admin
+                                </NavLink>
+                                <NavLink
+                                    v-if="$page.props.auth.user.roles?.some(r => r.name === 'admin')"
                                     :href="route('admin.categories.index')"
                                     :active="route().current('admin.categories.*')"
                                 >
@@ -190,6 +197,13 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('seller.products.*')"
                         >
                             My Products
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            v-if="$page.props.auth.user.roles?.some(r => r.name === 'admin')"
+                            :href="route('admin.dashboard')"
+                            :active="route().current('admin.dashboard')"
+                        >
+                            Admin
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             v-if="$page.props.auth.user.roles?.some(r => r.name === 'admin')"

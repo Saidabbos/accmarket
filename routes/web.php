@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Shop\CartController;
@@ -89,6 +90,7 @@ Route::middleware(['auth', 'verified', 'role:seller,admin'])->prefix('seller')->
 
 // Admin routes
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('categories', AdminCategoryController::class)->except(['show']);
     Route::patch('categories/{category}/toggle', [AdminCategoryController::class, 'toggleStatus'])->name('categories.toggle');
 });
