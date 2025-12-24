@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
@@ -101,6 +102,15 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::put('users/{user}/roles', [AdminUserController::class, 'updateRoles'])->name('users.roles');
     Route::post('users/{user}/ban', [AdminUserController::class, 'ban'])->name('users.ban');
     Route::post('users/{user}/unban', [AdminUserController::class, 'unban'])->name('users.unban');
+
+    // Product management
+    Route::get('products', [AdminProductController::class, 'index'])->name('products.index');
+    Route::get('products/{product}', [AdminProductController::class, 'show'])->name('products.show');
+    Route::get('products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
+    Route::put('products/{product}', [AdminProductController::class, 'update'])->name('products.update');
+    Route::delete('products/{product}', [AdminProductController::class, 'destroy'])->name('products.destroy');
+    Route::patch('products/{product}/status', [AdminProductController::class, 'toggleStatus'])->name('products.status');
+    Route::patch('products/{product}/featured', [AdminProductController::class, 'toggleFeatured'])->name('products.featured');
 });
 
 require __DIR__.'/auth.php';

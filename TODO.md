@@ -158,10 +158,10 @@
 - [x] Edit user roles
 
 ### Product Management (Admin)
-- [ ] View all products (any seller)
-- [ ] Edit/delete any product
-- [ ] Approve/reject products (if moderation needed)
-- [ ] View product statistics
+- [x] View all products (any seller)
+- [x] Edit/delete any product
+- [x] Approve/reject products (if moderation needed)
+- [x] View product statistics
 
 ### Analytics
 - [ ] Revenue charts
