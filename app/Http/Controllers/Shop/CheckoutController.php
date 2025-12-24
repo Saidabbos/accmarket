@@ -19,7 +19,7 @@ class CheckoutController extends Controller
         $cart = session('cart', []);
 
         if (empty($cart)) {
-            return redirect()->route('shop.cart')->withErrors(['cart' => 'Your cart is empty.']);
+            return redirect()->route('cart.index')->withErrors(['cart' => 'Your cart is empty.']);
         }
 
         $cartItems = [];
@@ -45,7 +45,7 @@ class CheckoutController extends Controller
 
         if (empty($cartItems)) {
             session()->forget('cart');
-            return redirect()->route('shop.cart')->withErrors(['cart' => 'No available products in cart.']);
+            return redirect()->route('cart.index')->withErrors(['cart' => 'No available products in cart.']);
         }
 
         return Inertia::render('Shop/Checkout', [
@@ -59,7 +59,7 @@ class CheckoutController extends Controller
         $cart = session('cart', []);
 
         if (empty($cart)) {
-            return redirect()->route('shop.cart')->withErrors(['cart' => 'Your cart is empty.']);
+            return redirect()->route('cart.index')->withErrors(['cart' => 'Your cart is empty.']);
         }
 
         DB::beginTransaction();

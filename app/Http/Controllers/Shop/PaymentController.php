@@ -18,7 +18,7 @@ class PaymentController extends Controller
     public function show(Order $order)
     {
         // Ensure user owns this order
-        if ($order->user_id !== auth()->id()) {
+        if ($order->buyer_id !== auth()->id()) {
             abort(403);
         }
 
@@ -33,7 +33,7 @@ class PaymentController extends Controller
     public function initiate(Order $order)
     {
         // Ensure user owns this order
-        if ($order->user_id !== auth()->id()) {
+        if ($order->buyer_id !== auth()->id()) {
             abort(403);
         }
 
@@ -56,7 +56,7 @@ class PaymentController extends Controller
     public function success(Order $order)
     {
         // Ensure user owns this order
-        if ($order->user_id !== auth()->id()) {
+        if ($order->buyer_id !== auth()->id()) {
             abort(403);
         }
 
@@ -70,7 +70,7 @@ class PaymentController extends Controller
     public function cancel(Order $order)
     {
         // Ensure user owns this order
-        if ($order->user_id !== auth()->id()) {
+        if ($order->buyer_id !== auth()->id()) {
             abort(403);
         }
 
@@ -107,7 +107,7 @@ class PaymentController extends Controller
 
     public function orders()
     {
-        $orders = Order::where('user_id', auth()->id())
+        $orders = Order::where('buyer_id', auth()->id())
             ->with(['items.productItem.product'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -120,7 +120,7 @@ class PaymentController extends Controller
     public function orderShow(Order $order)
     {
         // Ensure user owns this order
-        if ($order->user_id !== auth()->id()) {
+        if ($order->buyer_id !== auth()->id()) {
             abort(403);
         }
 
