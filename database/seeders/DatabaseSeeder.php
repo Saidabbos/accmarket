@@ -38,5 +38,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'seller@example.com',
         ]);
         $seller->assignRole('seller');
+
+        // Seed categories and products
+        $this->call([
+            CategorySeeder::class,
+            ProductSeeder::class,
+        ]);
     }
 }

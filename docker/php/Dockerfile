@@ -19,7 +19,8 @@ RUN apk add --no-cache \
     freetype-dev \
     oniguruma-dev \
     libxml2-dev \
-    supervisor
+    supervisor \
+    netcat-openbsd
 
 # Install PHP extensions (minimal set needed for Laravel)
 RUN docker-php-ext-configure gd \
@@ -33,6 +34,12 @@ RUN docker-php-ext-install -j$(nproc) \
     mbstring \
     xml \
     zip
+
+# Install Redis PHP extension
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apk del .build-deps
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

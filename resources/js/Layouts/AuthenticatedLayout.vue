@@ -39,6 +39,32 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    :href="route('shop.index')"
+                                    :active="route().current('shop.*')"
+                                >
+                                    Shop
+                                </NavLink>
+                                <NavLink
+                                    :href="route('orders.index')"
+                                    :active="route().current('orders.*')"
+                                >
+                                    My Orders
+                                </NavLink>
+                                <NavLink
+                                    v-if="$page.props.auth.user.roles?.some(r => r.name === 'seller' || r.name === 'admin')"
+                                    :href="route('seller.products.index')"
+                                    :active="route().current('seller.products.*')"
+                                >
+                                    My Products
+                                </NavLink>
+                                <NavLink
+                                    v-if="$page.props.auth.user.roles?.some(r => r.name === 'admin')"
+                                    :href="route('admin.categories.index')"
+                                    :active="route().current('admin.categories.*')"
+                                >
+                                    Categories
+                                </NavLink>
                             </div>
                         </div>
 
@@ -145,6 +171,32 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('shop.index')"
+                            :active="route().current('shop.*')"
+                        >
+                            Shop
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('orders.index')"
+                            :active="route().current('orders.*')"
+                        >
+                            My Orders
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            v-if="$page.props.auth.user.roles?.some(r => r.name === 'seller' || r.name === 'admin')"
+                            :href="route('seller.products.index')"
+                            :active="route().current('seller.products.*')"
+                        >
+                            My Products
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            v-if="$page.props.auth.user.roles?.some(r => r.name === 'admin')"
+                            :href="route('admin.categories.index')"
+                            :active="route().current('admin.categories.*')"
+                        >
+                            Categories
                         </ResponsiveNavLink>
                     </div>
 
