@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,49 +14,33 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        echo "\n";
+        echo str_repeat('=', 60) . "\n";
+        echo "  SEEDING ACCMARKET DATABASE\n";
+        echo str_repeat('=', 60) . "\n\n";
+
         // Seed roles first
+        echo "→ Creating roles...\n";
         $this->call(RoleSeeder::class);
 
-        // Create a test user with buyer role
-        $user = User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => bcrypt('password'),
-            ]
-        );
-        if (!$user->hasRole('buyer')) {
-            $user->assignRole('buyer');
-        }
-
-        // Create an admin user
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'Admin User',
-                'password' => bcrypt('password'),
-            ]
-        );
-        if (!$admin->hasRole('admin')) {
-            $admin->assignRole('admin');
-        }
-
-        // Create a seller user
-        $seller = User::firstOrCreate(
-            ['email' => 'seller@example.com'],
-            [
-                'name' => 'Seller User',
-                'password' => bcrypt('password'),
-            ]
-        );
-        if (!$seller->hasRole('seller')) {
-            $seller->assignRole('seller');
-        }
+        // Create users
+        echo "\n→ Creating users...\n";
+        $this->call(UserSeeder::class);
 
         // Seed categories and products
-        $this->call([
-            CategorySeeder::class,
-            ProductSeeder::class,
-        ]);
+        echo "\n→ Creating categories...\n";
+        $this->call(CategorySeeder::class);
+
+        echo "\n→ Creating products...\n";
+        $this->call(ProductSeeder::class);
+
+        echo "\n";
+        echo str_repeat('=', 60) . "\n";
+        echo "  DATABASE SEEDING COMPLETED!\n";
+        echo str_repeat('=', 60) . "\n";
+        echo "\nTest Accounts:\n";
+        echo "  Admin:  admin@accmarket.com  / password\n";
+        echo "  Seller: seller@test.com      / password\n";
+        echo "  Buyer:  buyer@test.com       / password\n\n";
     }
 }

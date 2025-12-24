@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProductItemStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,23 +37,23 @@ class ProductItem extends Model
 
     public function scopeAvailable($query)
     {
-        return $query->where('status', 'available');
+        return $query->where('status', ProductItemStatus::AVAILABLE->value);
     }
 
     public function scopeReserved($query)
     {
-        return $query->where('status', 'reserved');
+        return $query->where('status', ProductItemStatus::RESERVED->value);
     }
 
     public function scopeSold($query)
     {
-        return $query->where('status', 'sold');
+        return $query->where('status', ProductItemStatus::SOLD->value);
     }
 
     public function reserve(Order $order): void
     {
         $this->update([
-            'status' => 'reserved',
+            'status' => ProductItemStatus::RESERVED->value,
             'order_id' => $order->id,
             'reserved_at' => now(),
         ]);
@@ -61,7 +62,7 @@ class ProductItem extends Model
     public function markAsSold(): void
     {
         $this->update([
-            'status' => 'sold',
+            'status' => ProductItemStatus::SOLD->value,
             'sold_at' => now(),
         ]);
     }
@@ -69,9 +70,24 @@ class ProductItem extends Model
     public function release(): void
     {
         $this->update([
-            'status' => 'available',
+            'status' => ProductItemStatus::AVAILABLE->value,
             'order_id' => null,
             'reserved_at' => null,
         ]);
+    }
+
+    public function isAvailable(): bool
+    {
+        return $this->status === ProductItemStatus::AVAILABLE->value;
+    }
+
+    public function isSold(): bool
+    {
+        return $this->status === ProductItemStatus::SOLD->value;
+    }
+
+    public function isReserved(): bool
+    {
+        return $this->status === ProductItemStatus::RESERVED->value;
     }
 }

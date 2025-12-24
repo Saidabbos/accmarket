@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shop;
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -19,7 +20,7 @@ class DownloadController extends Controller
         }
 
         // Verify order is completed
-        if ($order->status !== 'completed') {
+        if ($order->status !== OrderStatus::COMPLETED->value) {
             return back()->with('error', 'Order is not completed yet.');
         }
 
@@ -54,7 +55,7 @@ class DownloadController extends Controller
         }
 
         // Verify order is completed
-        if ($order->status !== 'completed') {
+        if ($order->status !== OrderStatus::COMPLETED->value) {
             abort(403, 'Order is not completed.');
         }
 
@@ -90,7 +91,7 @@ class DownloadController extends Controller
         }
 
         // Verify order is completed
-        if ($order->status !== 'completed') {
+        if ($order->status !== OrderStatus::COMPLETED->value) {
             abort(403, 'Order is not completed.');
         }
 
@@ -122,7 +123,7 @@ class DownloadController extends Controller
         }
 
         // Verify order is completed
-        if ($order->status !== 'completed') {
+        if ($order->status !== OrderStatus::COMPLETED->value) {
             return back()->with('error', 'Order is not completed yet.');
         }
 
