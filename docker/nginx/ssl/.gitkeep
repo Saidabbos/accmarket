@@ -1,0 +1,9 @@
+# SSL certificates directory
+# Place your production SSL certificates here:
+# - fullchain.pem
+# - privkey.pem
+#
+# For Let's Encrypt:
+# sudo certbot certonly --standalone -d yourdomain.com
+# sudo cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem ./
+# sudo cp /etc/letsencrypt/live/yourdomain.com/privkey.pem ./
