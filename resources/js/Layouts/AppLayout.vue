@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
+import Toast from '@/Components/Toast.vue';
 
 const page = usePage();
 const mobileMenuOpen = ref(false);
@@ -11,6 +12,7 @@ const categories = ref([]);
 const user = computed(() => page.props.auth?.user);
 const isAdmin = computed(() => user.value?.roles?.some(r => r.name === 'admin'));
 const isSeller = computed(() => user.value?.roles?.some(r => r.name === 'seller' || r.name === 'admin'));
+const cartCount = computed(() => page.props.cartCount || 0);
 
 const parentCategories = computed(() => {
     return categories.value?.filter(cat => !cat.parent_id) || [];
@@ -88,6 +90,9 @@ const toggleDarkMode = () => {
 
 <template>
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+        <!-- Toast Notifications -->
+        <Toast />
+
         <!-- Navigation -->
         <nav class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-100 dark:border-gray-800">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -103,16 +108,6 @@ const toggleDarkMode = () => {
 
                         <!-- Desktop Navigation -->
                         <div class="hidden md:flex items-center space-x-1">
-                            <Link
-                                :href="route('shop.index')"
-                                class="px-3 py-2 text-sm font-medium rounded-lg transition-colors"
-                                :class="route().current('shop.index')
-                                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30'
-                                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'"
-                            >
-                                Shop
-                            </Link>
-
                             <!-- Categories Dropdown -->
                             <div class="relative" @mouseleave="categoriesOpen = false">
                                 <button
@@ -223,6 +218,12 @@ const toggleDarkMode = () => {
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                             </svg>
+                            <span
+                                v-if="cartCount > 0"
+                                class="absolute -top-1 -right-1 w-5 h-5 bg-indigo-600 text-white text-xs font-bold rounded-full flex items-center justify-center"
+                            >
+                                {{ cartCount > 99 ? '99+' : cartCount }}
+                            </span>
                         </Link>
 
                         <!-- Admin Link -->
@@ -296,15 +297,6 @@ const toggleDarkMode = () => {
                 <!-- Mobile Navigation -->
                 <div v-if="mobileMenuOpen" class="md:hidden py-4 border-t border-gray-100 dark:border-gray-800">
                     <div class="space-y-1">
-                        <Link
-                            :href="route('shop.index')"
-                            class="block px-3 py-2 text-sm font-medium rounded-lg transition-colors"
-                            :class="route().current('shop.index')
-                                ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30'
-                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
-                        >
-                            Shop
-                        </Link>
                         <template v-if="user">
                             <Link
                                 :href="route('orders.index')"

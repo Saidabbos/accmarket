@@ -102,7 +102,7 @@ class ProcessCheckoutAction extends BaseAction
     private function createOrder(int $userId, float $totalAmount): Order
     {
         return Order::create([
-            'user_id' => $userId,
+            'buyer_id' => $userId,
             'order_number' => $this->generateOrderNumber(),
             'total_amount' => $totalAmount,
             'status' => OrderStatus::PENDING->value,
@@ -121,27 +121,25 @@ class ProcessCheckoutAction extends BaseAction
     private function createOrderItems(Order $order, array $orderItems): void
     {
         foreach ($orderItems as $item) {
-            $orderItemRecord = OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item['product']->id,
-                'seller_id' => $item['product']->seller_id,
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
-                'total' => $item['price'] * $item['quantity'],
-            ]);
+            // Create one OrderItem per ProductItem
+            foreach ($item['product_items'] as $productItem) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_item_id' => $productItem->id,
+                    'product_id' => $item['product']->id,
+                    'seller_id' => $item['product']->seller_id,
+                    'quantity' => 1,
+                    'price' => $item['price'],
+                    'total' => $item['price'],
+                ]);
 
-            $this->markProductItemsAsSold($item['product_items'], $orderItemRecord->id);
+                // Mark the product item as sold
+                $productItem->update([
+                    'status' => ProductItemStatus::SOLD->value,
+                ]);
+            }
+
             $item['product']->updateStockCount();
-        }
-    }
-
-    private function markProductItemsAsSold($productItems, int $orderItemId): void
-    {
-        foreach ($productItems as $productItem) {
-            $productItem->update([
-                'status' => ProductItemStatus::SOLD->value,
-                'order_item_id' => $orderItemId,
-            ]);
         }
     }
 

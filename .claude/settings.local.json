@@ -10,7 +10,12 @@
       "Bash(composer install:*)",
       "Bash(wsl rm:*)",
       "Bash(php artisan:*)",
-      "Bash(wsl php artisan route:list:*)"
+      "Bash(wsl php artisan route:list:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(dir /b \"c:\\\\Users\\\\ssula\\\\projects\\\\mpa\\\\*.md\")",
+      "Bash(npx vite build)",
+      "Bash(wsl -e bash -c:*)"
     ]
   }
 }

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import Toast from '@/Components/Toast.vue';
 
 const page = usePage();
 const sidebarOpen = ref(false);
@@ -81,6 +82,9 @@ const quickLinks = [
 
 <template>
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+        <!-- Toast Notifications -->
+        <Toast />
+
         <!-- Mobile sidebar backdrop -->
         <div
             v-if="sidebarOpen"

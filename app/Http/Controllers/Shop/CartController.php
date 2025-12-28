@@ -18,7 +18,10 @@ class CartController extends Controller
         $cartItems = [];
         $total = 0;
 
-        foreach ($cart as $productId => $quantity) {
+        foreach ($cart as $productId => $item) {
+            // Handle both old format (quantity as integer) and new format (array with quantity key)
+            $quantity = is_array($item) ? ($item['quantity'] ?? 0) : $item;
+
             $product = Product::with('category')
                 ->withCount('availableItems')
                 ->find($productId);
@@ -66,7 +69,19 @@ class CartController extends Controller
         } else {
             $product = Product::withCount('availableItems')->find($validated['product_id']);
             if ($product) {
-                $cart[$validated['product_id']] = min($validated['quantity'], $product->available_items_count);
+                $newQty = min($validated['quantity'], $product->available_items_count);
+                // Update quantity in array format
+                if (isset($cart[$validated['product_id']]) && is_array($cart[$validated['product_id']])) {
+                    $cart[$validated['product_id']]['quantity'] = $newQty;
+                } else {
+                    $cart[$validated['product_id']] = [
+                        'product_id' => $product->id,
+                        'name' => $product->name,
+                        'price' => $product->price,
+                        'quantity' => $newQty,
+                        'seller_id' => $product->seller_id,
+                    ];
+                }
             }
         }
 
@@ -99,6 +114,10 @@ class CartController extends Controller
     public function count()
     {
         $cart = session(config('shop.cart.session_key'), []);
-        return response()->json(['count' => array_sum($cart)]);
+        $count = 0;
+        foreach ($cart as $item) {
+            $count += is_array($item) ? ($item['quantity'] ?? 0) : $item;
+        }
+        return response()->json(['count' => $count]);
     }
 }

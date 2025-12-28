@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\DatabaseBackupController as AdminDatabaseBackupController;
 use App\Http\Controllers\Admin\DisputeController as AdminDisputeController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -21,35 +22,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    $categoriesWithProducts = \App\Models\Category::active()
-        ->whereNotNull('parent_id')
-        ->with(['products' => function ($query) {
-            $query->where('status', 'active')
-                ->where('stock_count', '>', 0)
-                ->withAvg('reviews', 'rating')
-                ->withCount('reviews')
-                ->orderBy('created_at', 'desc')
-                ->limit(6);
-        }])
-        ->get()
-        ->filter(function ($category) {
-            return $category->products->isNotEmpty();
-        })
-        ->values();
+// Redirect home to shop
+Route::redirect('/', '/shop');
 
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-        'categoriesWithProducts' => $categoriesWithProducts,
-    ]);
-});
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -126,6 +101,11 @@ Route::get('/download/order/{order}/all', [DownloadController::class, 'downloadA
 // IPN webhook (no auth - external callback)
 Route::post('/payment/ipn', [PaymentController::class, 'ipn'])->name('payment.ipn');
 
+// Signed backup download (no auth middleware - verified by signature)
+Route::get('/admin/backup/download/{filename}', [AdminDatabaseBackupController::class, 'downloadFile'])
+    ->name('admin.backup.download-file')
+    ->middleware('signed');
+
 // Seller routes
 Route::middleware(['auth', 'verified', 'role:seller,admin'])->prefix('seller')->name('seller.')->group(function () {
     Route::resource('products', SellerProductController::class);
@@ -134,7 +114,7 @@ Route::middleware(['auth', 'verified', 'role:seller,admin'])->prefix('seller')->
 });
 
 // Admin routes
-Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('dashboard')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('categories', AdminCategoryController::class)->except(['show']);
     Route::patch('categories/{category}/toggle', [AdminCategoryController::class, 'toggleStatus'])->name('categories.toggle');
@@ -166,6 +146,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         Route::get('products', [AdminReportController::class, 'exportProducts'])->name('products');
         Route::get('users', [AdminReportController::class, 'exportUsers'])->name('users');
         Route::get('revenue', [AdminReportController::class, 'exportRevenue'])->name('revenue');
+    });
+
+    // Database Backup
+    Route::prefix('backup')->name('backup.')->group(function () {
+        Route::get('database', [AdminDatabaseBackupController::class, 'download'])->name('database');
+        Route::get('database/compressed', [AdminDatabaseBackupController::class, 'downloadCompressed'])->name('database.compressed');
+        Route::get('list', [AdminDatabaseBackupController::class, 'listBackups'])->name('list');
     });
 
     // Dispute management

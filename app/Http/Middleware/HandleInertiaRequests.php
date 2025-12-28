@@ -38,6 +38,20 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'cartCount' => fn () => $this->getCartCount($request),
         ];
+    }
+
+    /**
+     * Get the total cart item count.
+     */
+    private function getCartCount(Request $request): int
+    {
+        $cart = $request->session()->get(config('shop.cart.session_key'), []);
+        $count = 0;
+        foreach ($cart as $item) {
+            $count += is_array($item) ? ($item['quantity'] ?? 0) : (int) $item;
+        }
+        return $count;
     }
 }
