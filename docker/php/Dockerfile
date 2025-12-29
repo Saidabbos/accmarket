@@ -80,13 +80,16 @@ FROM base AS production
 # Copy production PHP config only
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/99-php.ini
 
+# Configure Git to trust the /app directory (fixes ownership issues in Docker)
+RUN git config --global --add safe.directory /app
+
 # Copy application
 COPY --chown=www:www . /app
 
 # Ensure storage directories exist and have correct permissions
-RUN mkdir -p storage/logs storage/app storage/framework/cache storage/framework/sessions \
-    && chown -R www:www /app/storage \
-    && chmod -R 775 /app/storage
+RUN mkdir -p storage/logs storage/app storage/framework/cache storage/framework/sessions storage/framework/views \
+    && chown -R www:www /app/storage /app/bootstrap/cache \
+    && chmod -R 775 /app/storage /app/bootstrap/cache
 
 # Install production dependencies (no dev dependencies)
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
@@ -94,6 +97,9 @@ RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoload
 # Copy entrypoint script
 COPY docker/php/entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Switch to non-root user for security
+USER www
 
 EXPOSE 9000
 
