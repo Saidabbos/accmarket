@@ -46,10 +46,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 1G
+          cpus: '0.4'
+          memory: 512M
         reservations:
-          cpus: '0.5'
+          cpus: '0.35'
           memory: 256M
 
   # ===========================================================================
@@ -82,10 +82,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: '0.1'
           memory: 256M
         reservations:
-          cpus: '0.25'
+          cpus: '0.08'
           memory: 64M
 
   # ===========================================================================
@@ -109,8 +109,8 @@ services:
       - --default-authentication-plugin=mysql_native_password
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
-      - --innodb-buffer-pool-size=256M
-      - --max-connections=200
+      - --innodb-buffer-pool-size=128M
+      - --max-connections=100
       - --slow-query-log=1
       - --slow-query-log-file=/var/log/mysql/slow.log
       - --long-query-time=2
@@ -125,11 +125,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
+          cpus: '0.35'
           memory: 512M
+        reservations:
+          cpus: '0.3'
+          memory: 256M
 
   # ===========================================================================
   # Redis Cache & Session Store
@@ -157,10 +157,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: '0.1'
           memory: 256M
         reservations:
-          cpus: '0.1'
+          cpus: '0.08'
           memory: 64M
 
   # ===========================================================================
@@ -193,10 +193,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: 512M
+          cpus: '0.05'
+          memory: 256M
         reservations:
-          cpus: '0.25'
+          cpus: '0.04'
           memory: 128M
 
   # ===========================================================================
@@ -230,10 +230,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 256M
+          cpus: '0.05'
+          memory: 128M
         reservations:
-          cpus: '0.1'
+          cpus: '0.02'
           memory: 64M
 
 # =============================================================================
