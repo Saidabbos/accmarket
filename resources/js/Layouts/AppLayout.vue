@@ -126,10 +126,15 @@ const toggleDarkMode = () => {
                                     </svg>
                                 </button>
 
+                                <!-- Invisible bridge to prevent menu closing -->
+                                <div
+                                    v-if="categoriesOpen"
+                                    class="absolute left-0 top-full h-2 w-full"
+                                ></div>
+
                                 <!-- Mega Menu Dropdown -->
                                 <div
                                     v-if="categoriesOpen"
-                                    @mouseenter="categoriesOpen = true"
                                     class="absolute left-0 top-full mt-1 w-screen max-w-4xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50"
                                 >
                                     <div class="p-6">
