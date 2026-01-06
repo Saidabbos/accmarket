@@ -1,23 +1,41 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useTranslations } from '@/composables/useTranslations';
 
 const { locale, locales } = useTranslations();
 const isOpen = ref(false);
+const dropdownRef = ref(null);
 
 const flags = {
     en: '🇬🇧',
     ru: '🇷🇺',
     uz: '🇺🇿',
 };
+
+const toggleDropdown = () => {
+    isOpen.value = !isOpen.value;
+};
+
+const closeDropdown = (event) => {
+    if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+        isOpen.value = false;
+    }
+};
+
+onMounted(() => {
+    document.addEventListener('click', closeDropdown);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', closeDropdown);
+});
 </script>
 
 <template>
-    <div class="relative" @mouseleave="isOpen = false">
+    <div ref="dropdownRef" class="relative">
         <button
-            @mouseenter="isOpen = true"
-            @click="isOpen = !isOpen"
+            @click="toggleDropdown"
             class="flex items-center space-x-1 px-2 py-1.5 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
             <span class="text-base">{{ flags[locale] }}</span>
