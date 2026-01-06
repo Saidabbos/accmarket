@@ -137,16 +137,25 @@ return [
 
     // Auth
     'auth' => [
-        'login' => 'Login',
-        'register' => 'Register',
+        'login' => 'Sign In',
+        'login_subtitle' => 'Welcome back! Please sign in to your account.',
+        'register' => 'Create Account',
+        'register_subtitle' => 'Join us today and start trading digital products.',
         'email' => 'Email',
+        'email_placeholder' => 'Enter your email',
         'password' => 'Password',
+        'password_placeholder' => 'Enter your password',
         'confirm_password' => 'Confirm Password',
-        'name' => 'Name',
+        'confirm_password_placeholder' => 'Confirm your password',
+        'name' => 'Full Name',
+        'name_placeholder' => 'Enter your name',
         'remember_me' => 'Remember me',
-        'forgot_password' => 'Forgot your password?',
+        'forgot_password' => 'Forgot password?',
         'already_registered' => 'Already registered?',
         'no_account' => "Don't have an account?",
+        'have_account' => 'Already have an account?',
+        'logging_in' => 'Signing in...',
+        'registering' => 'Creating account...',
     ],
 
     // Common

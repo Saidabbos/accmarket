@@ -137,16 +137,25 @@ return [
 
     // Auth
     'auth' => [
-        'login' => 'Вход',
+        'login' => 'Войти',
+        'login_subtitle' => 'С возвращением! Войдите в свой аккаунт.',
         'register' => 'Регистрация',
+        'register_subtitle' => 'Присоединяйтесь и начните торговать цифровыми товарами.',
         'email' => 'Email',
+        'email_placeholder' => 'Введите email',
         'password' => 'Пароль',
+        'password_placeholder' => 'Введите пароль',
         'confirm_password' => 'Подтвердите пароль',
+        'confirm_password_placeholder' => 'Подтвердите пароль',
         'name' => 'Имя',
+        'name_placeholder' => 'Введите ваше имя',
         'remember_me' => 'Запомнить меня',
         'forgot_password' => 'Забыли пароль?',
         'already_registered' => 'Уже зарегистрированы?',
         'no_account' => 'Нет аккаунта?',
+        'have_account' => 'Уже есть аккаунт?',
+        'logging_in' => 'Вход...',
+        'registering' => 'Регистрация...',
     ],
 
     // Common
