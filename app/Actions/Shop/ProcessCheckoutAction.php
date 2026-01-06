@@ -25,7 +25,7 @@ class ProcessCheckoutAction extends BaseAction
         $orderItems = $this->validateAndPrepareOrderItems($cart);
         $totalAmount = $this->calculateTotalAmount($orderItems);
 
-        $order = $this->createOrder($data['user_id'], $totalAmount);
+        $order = $this->createOrder($data, $totalAmount);
         $this->createOrderItems($order, $orderItems);
         $this->clearCart();
 
@@ -99,15 +99,25 @@ class ProcessCheckoutAction extends BaseAction
         return $total;
     }
 
-    private function createOrder(int $userId, float $totalAmount): Order
+    private function createOrder(array $data, float $totalAmount): Order
     {
-        return Order::create([
-            'buyer_id' => $userId,
+        $orderData = [
             'order_number' => $this->generateOrderNumber(),
             'total_amount' => $totalAmount,
             'status' => OrderStatus::PENDING->value,
             'payment_status' => PaymentStatus::PENDING->value,
-        ]);
+        ];
+
+        // Handle authenticated user or guest checkout
+        if (!empty($data['user_id'])) {
+            $orderData['buyer_id'] = $data['user_id'];
+        } else {
+            // Guest checkout - require email
+            $orderData['guest_email'] = $data['guest_email'] ?? null;
+            $orderData['guest_token'] = Str::random(64);
+        }
+
+        return Order::create($orderData);
     }
 
     private function generateOrderNumber(): string

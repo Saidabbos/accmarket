@@ -27,17 +27,19 @@ class CloudflareSecurityHeaders
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
         }
 
-        // Content Security Policy
-        $csp = [
-            "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-            "font-src 'self' https://fonts.gstatic.com data:",
-            "img-src 'self' data: https:",
-            "connect-src 'self'",
-            "frame-ancestors 'self'",
-        ];
-        $response->headers->set('Content-Security-Policy', implode('; ', $csp));
+        // Content Security Policy - skip in local development
+        if (app()->environment('production')) {
+            $csp = [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
+                "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:",
+                "img-src 'self' data: https:",
+                "connect-src 'self' https://nowpayments.io",
+                "frame-ancestors 'self'",
+            ];
+            $response->headers->set('Content-Security-Policy', implode('; ', $csp));
+        }
 
         return $response;
     }

@@ -2,7 +2,10 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
 import Toast from '@/Components/Toast.vue';
+import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
+import { useTranslations } from '@/composables/useTranslations';
 
+const { t } = useTranslations();
 const page = usePage();
 const mobileMenuOpen = ref(false);
 const darkMode = ref(false);
@@ -12,7 +15,6 @@ const categories = ref([]);
 const user = computed(() => page.props.auth?.user);
 const isAdmin = computed(() => user.value?.roles?.some(r => r.name === 'admin'));
 const isSeller = computed(() => user.value?.roles?.some(r => r.name === 'seller' || r.name === 'admin'));
-const cartCount = computed(() => page.props.cartCount || 0);
 
 const parentCategories = computed(() => {
     return categories.value?.filter(cat => !cat.parent_id) || [];
@@ -100,10 +102,12 @@ const toggleDarkMode = () => {
                     <!-- Logo -->
                     <div class="flex items-center space-x-8">
                         <Link :href="route('shop.index')" class="flex items-center space-x-2">
-                            <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                <span class="text-white font-bold text-sm">AM</span>
-                            </div>
-                            <span class="text-lg font-semibold text-gray-900 dark:text-white hidden sm:block">AccMarket</span>
+                            <!-- AccssIO Logo -->
+                            <svg class="w-8 h-8" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="8" class="fill-indigo-600"/>
+                                <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold" font-size="18">A</text>
+                            </svg>
+                            <span class="text-lg font-semibold text-gray-900 dark:text-white hidden sm:block">AccssIO</span>
                         </Link>
 
                         <!-- Desktop Navigation -->
@@ -114,7 +118,7 @@ const toggleDarkMode = () => {
                                     @mouseenter="categoriesOpen = true"
                                     class="px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
                                 >
-                                    Categories
+                                    {{ t('nav.categories') }}
                                     <svg
                                         class="w-4 h-4 transition-transform"
                                         :class="categoriesOpen ? 'rotate-180' : ''"
@@ -167,7 +171,7 @@ const toggleDarkMode = () => {
                                                 class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1"
                                                 @click="categoriesOpen = false"
                                             >
-                                                View all products
+                                                {{ t('nav.view_all_products') }}
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                                 </svg>
@@ -184,7 +188,7 @@ const toggleDarkMode = () => {
                                         ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30'
                                         : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'"
                                 >
-                                    Orders
+                                    {{ t('nav.orders') }}
                                 </Link>
                                 <Link
                                     v-if="isSeller"
@@ -194,14 +198,17 @@ const toggleDarkMode = () => {
                                         ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30'
                                         : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'"
                                 >
-                                    Sell
+                                    {{ t('nav.sell') }}
                                 </Link>
                             </template>
                         </div>
                     </div>
 
                     <!-- Right Side -->
-                    <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-2">
+                        <!-- Language Switcher -->
+                        <LanguageSwitcher />
+
                         <!-- Dark Mode Toggle -->
                         <button
                             @click="toggleDarkMode"
@@ -214,22 +221,6 @@ const toggleDarkMode = () => {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                             </svg>
                         </button>
-
-                        <!-- Cart -->
-                        <Link
-                            :href="route('cart.index')"
-                            class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                            </svg>
-                            <span
-                                v-if="cartCount > 0"
-                                class="absolute -top-1 -right-1 w-5 h-5 bg-indigo-600 text-white text-xs font-bold rounded-full flex items-center justify-center"
-                            >
-                                {{ cartCount > 99 ? '99+' : cartCount }}
-                            </span>
-                        </Link>
 
                         <!-- Admin Link -->
                         <Link
@@ -273,13 +264,13 @@ const toggleDarkMode = () => {
                                     :href="route('login')"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                                 >
-                                    Sign in
+                                    {{ t('nav.sign_in') }}
                                 </Link>
                                 <Link
                                     :href="route('register')"
                                     class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
                                 >
-                                    Get started
+                                    {{ t('nav.get_started') }}
                                 </Link>
                             </div>
                         </template>
@@ -307,28 +298,28 @@ const toggleDarkMode = () => {
                                 :href="route('orders.index')"
                                 class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                             >
-                                My Orders
+                                {{ t('nav.my_orders') }}
                             </Link>
                             <Link
                                 v-if="isSeller"
                                 :href="route('seller.products.index')"
                                 class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                             >
-                                My Products
+                                {{ t('nav.my_products') }}
                             </Link>
                             <Link
                                 v-if="isAdmin"
                                 :href="route('admin.dashboard')"
                                 class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                             >
-                                Admin Panel
+                                {{ t('nav.admin_panel') }}
                             </Link>
                             <div class="pt-4 border-t border-gray-100 dark:border-gray-800 mt-4">
                                 <Link
                                     :href="route('profile.edit')"
                                     class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                                 >
-                                    Profile
+                                    {{ t('nav.profile') }}
                                 </Link>
                                 <Link
                                     :href="route('logout')"
@@ -336,7 +327,7 @@ const toggleDarkMode = () => {
                                     as="button"
                                     class="block w-full text-left px-3 py-2 text-sm font-medium rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 >
-                                    Sign out
+                                    {{ t('nav.sign_out') }}
                                 </Link>
                             </div>
                         </template>
@@ -346,13 +337,13 @@ const toggleDarkMode = () => {
                                     :href="route('login')"
                                     class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                                 >
-                                    Sign in
+                                    {{ t('nav.sign_in') }}
                                 </Link>
                                 <Link
                                     :href="route('register')"
                                     class="block px-3 py-2 text-sm font-medium text-center text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
                                 >
-                                    Get started
+                                    {{ t('nav.get_started') }}
                                 </Link>
                             </div>
                         </template>
@@ -371,18 +362,19 @@ const toggleDarkMode = () => {
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
                 <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
                     <div class="flex items-center space-x-2">
-                        <div class="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-md flex items-center justify-center">
-                            <span class="text-white font-bold text-xs">AM</span>
-                        </div>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">AccMarket</span>
+                        <svg class="w-6 h-6" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" rx="8" class="fill-indigo-600"/>
+                            <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold" font-size="18">A</text>
+                        </svg>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">AccssIO</span>
                     </div>
                     <div class="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
-                        <Link :href="route('shop.index')" class="hover:text-gray-900 dark:hover:text-white transition-colors">Shop</Link>
-                        <a href="#" class="hover:text-gray-900 dark:hover:text-white transition-colors">Terms</a>
-                        <a href="#" class="hover:text-gray-900 dark:hover:text-white transition-colors">Privacy</a>
+                        <Link :href="route('shop.index')" class="hover:text-gray-900 dark:hover:text-white transition-colors">{{ t('common.shop') }}</Link>
+                        <a href="#" class="hover:text-gray-900 dark:hover:text-white transition-colors">{{ t('common.terms') }}</a>
+                        <a href="#" class="hover:text-gray-900 dark:hover:text-white transition-colors">{{ t('common.privacy') }}</a>
                     </div>
                     <p class="text-sm text-gray-400 dark:text-gray-500">
-                        &copy; {{ new Date().getFullYear() }} AccMarket. All rights reserved.
+                        &copy; {{ new Date().getFullYear() }} AccssIO. {{ t('common.all_rights_reserved') }}.
                     </p>
                 </div>
             </div>

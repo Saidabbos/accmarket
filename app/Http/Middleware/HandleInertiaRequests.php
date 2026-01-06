@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -38,20 +39,27 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
-            'cartCount' => fn () => $this->getCartCount($request),
+            'locale' => fn () => App::getLocale(),
+            'locales' => fn () => [
+                'en' => 'English',
+                'ru' => 'Русский',
+            ],
+            'translations' => fn () => $this->getTranslations(),
         ];
     }
 
     /**
-     * Get the total cart item count.
+     * Get translations for current locale.
      */
-    private function getCartCount(Request $request): int
+    private function getTranslations(): array
     {
-        $cart = $request->session()->get(config('shop.cart.session_key'), []);
-        $count = 0;
-        foreach ($cart as $item) {
-            $count += is_array($item) ? ($item['quantity'] ?? 0) : (int) $item;
+        $locale = App::getLocale();
+        $path = lang_path("{$locale}/app.php");
+
+        if (file_exists($path)) {
+            return require $path;
         }
-        return $count;
+
+        return require lang_path('en/app.php');
     }
 }

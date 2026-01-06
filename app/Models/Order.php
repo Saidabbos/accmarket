@@ -14,6 +14,8 @@ class Order extends Model
 
     protected $fillable = [
         'buyer_id',
+        'guest_email',
+        'guest_token',
         'product_id',
         'order_number',
         'quantity',
@@ -100,6 +102,16 @@ class Order extends Model
     public function scopeForBuyer($query, $buyerId)
     {
         return $query->where('buyer_id', $buyerId);
+    }
+
+    public function isGuestOrder(): bool
+    {
+        return is_null($this->buyer_id) && !is_null($this->guest_email);
+    }
+
+    public function getCustomerEmail(): ?string
+    {
+        return $this->buyer?->email ?? $this->guest_email;
     }
 
     public function markAsPaid(string $paymentId, string $paymentMethod): void

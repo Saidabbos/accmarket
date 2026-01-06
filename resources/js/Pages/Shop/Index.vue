@@ -3,7 +3,11 @@ import { ref, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StarRating from '@/Components/StarRating.vue';
+import BuyModal from '@/Components/BuyModal.vue';
+import { useTranslations } from '@/composables/useTranslations';
 import debounce from 'lodash/debounce';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     products: Object,
@@ -16,6 +20,10 @@ const category = ref(props.filters.category || '');
 const minPrice = ref(props.filters.min_price || '');
 const maxPrice = ref(props.filters.max_price || '');
 const sort = ref(props.filters.sort || 'newest');
+
+// Buy modal state
+const showBuyModal = ref(false);
+const selectedProduct = ref(null);
 
 const applyFilters = debounce(() => {
     router.get(route('shop.index'), {
@@ -41,26 +49,27 @@ const clearFilters = () => {
     router.get(route('shop.index'));
 };
 
-const addToCart = (product) => {
-    router.post(route('cart.add'), {
-        product_id: product.id,
-        quantity: 1,
-    }, {
-        preserveScroll: true,
-    });
+const openBuyModal = (product) => {
+    selectedProduct.value = product;
+    showBuyModal.value = true;
+};
+
+const closeBuyModal = () => {
+    showBuyModal.value = false;
+    selectedProduct.value = null;
 };
 </script>
 
 <template>
-    <Head title="Shop" />
+    <Head :title="t('common.shop')" />
 
     <AppLayout>
         <div class="py-8">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
                 <div class="mb-8">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Shop</h1>
-                    <p class="mt-2 text-gray-600 dark:text-gray-400">Browse our collection of digital products</p>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{{ t('common.shop') }}</h1>
+                    <p class="mt-2 text-gray-600 dark:text-gray-400">{{ t('shop.subtitle') }}</p>
                 </div>
 
                 <!-- Product List -->
@@ -70,7 +79,7 @@ const addToCart = (product) => {
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <!-- Search -->
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Search</label>
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{{ t('common.search') }}</label>
                                     <div class="relative">
                                         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -78,7 +87,7 @@ const addToCart = (product) => {
                                         <input
                                             v-model="search"
                                             type="text"
-                                            placeholder="Search..."
+                                            :placeholder="t('shop.search')"
                                             class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                         />
                                     </div>
@@ -86,7 +95,7 @@ const addToCart = (product) => {
 
                                 <!-- Price Min -->
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Min Price</label>
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{{ t('shop.min_price') }}</label>
                                     <input
                                         v-model="minPrice"
                                         type="number"
@@ -99,7 +108,7 @@ const addToCart = (product) => {
 
                                 <!-- Price Max -->
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Max Price</label>
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{{ t('shop.max_price') }}</label>
                                     <input
                                         v-model="maxPrice"
                                         type="number"
@@ -112,15 +121,15 @@ const addToCart = (product) => {
 
                                 <!-- Sort -->
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Sort By</label>
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{{ t('shop.sort_by') }}</label>
                                     <select
                                         v-model="sort"
                                         @change="applyFilters"
                                         class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                     >
-                                        <option value="newest">Newest First</option>
-                                        <option value="price_asc">Price: Low to High</option>
-                                        <option value="price_desc">Price: High to Low</option>
+                                        <option value="newest">{{ t('shop.newest') }}</option>
+                                        <option value="price_asc">{{ t('shop.price_low') }}</option>
+                                        <option value="price_desc">{{ t('shop.price_high') }}</option>
                                         <option value="name">Name A-Z</option>
                                     </select>
                                 </div>
@@ -183,7 +192,7 @@ const addToCart = (product) => {
                                                 size="xs"
                                             />
                                             <span class="text-xs text-emerald-600 dark:text-emerald-400">
-                                                {{ product.available_items_count }} in stock
+                                                {{ product.available_items_count }} {{ t('shop.in_stock') }}
                                             </span>
                                         </div>
                                     </div>
@@ -194,11 +203,18 @@ const addToCart = (product) => {
                                             ${{ parseFloat(product.price).toFixed(2) }}
                                         </div>
                                         <button
-                                            @click.prevent="addToCart(product)"
-                                            class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors"
+                                            v-if="product.available_items_count > 0"
+                                            @click.prevent="openBuyModal(product)"
+                                            class="px-4 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors"
                                         >
-                                            Add
+                                            {{ t('shop.buy_now') }}
                                         </button>
+                                        <span
+                                            v-else
+                                            class="px-3 py-1.5 text-sm font-medium text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded-md"
+                                        >
+                                            {{ t('shop.out_of_stock') }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -211,7 +227,7 @@ const addToCart = (product) => {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No products found</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ t('shop.no_products') }}</h3>
                             <p class="text-gray-500 dark:text-gray-400 mb-4">Try adjusting your filters or search criteria.</p>
                             <button
                                 @click="clearFilters"
@@ -245,6 +261,13 @@ const addToCart = (product) => {
                 </div>
             </div>
         </div>
+
+        <!-- Buy Modal -->
+        <BuyModal
+            :show="showBuyModal"
+            :product="selectedProduct"
+            @close="closeBuyModal"
+        />
     </AppLayout>
 </template>
 

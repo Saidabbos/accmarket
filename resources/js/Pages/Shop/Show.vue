@@ -1,36 +1,30 @@
 <script setup>
 import { ref } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import BuyModal from '@/Components/BuyModal.vue';
+import { useTranslations } from '@/composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     product: Object,
     relatedProducts: Array,
 });
 
-const quantity = ref(1);
+// Buy modal state
+const showBuyModal = ref(false);
 
-const addToCart = () => {
-    router.post(route('cart.add'), {
-        product_id: props.product.id,
-        quantity: quantity.value,
-    });
+const openBuyModal = () => {
+    showBuyModal.value = true;
 };
 
-const increaseQty = () => {
-    if (quantity.value < props.product.available_items_count) {
-        quantity.value++;
-    }
-};
-
-const decreaseQty = () => {
-    if (quantity.value > 1) {
-        quantity.value--;
-    }
+const closeBuyModal = () => {
+    showBuyModal.value = false;
 };
 
 const breadcrumbs = () => {
-    const crumbs = [{ name: 'Shop', href: route('shop.index') }];
+    const crumbs = [{ name: t('common.shop'), href: route('shop.index') }];
     if (props.product.category?.parent) {
         crumbs.push({
             name: props.product.category.parent.name,
@@ -93,7 +87,7 @@ const breadcrumbs = () => {
                                         ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400'
                                         : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400'"
                                 >
-                                    {{ product.available_items_count > 0 ? `${product.available_items_count} in stock` : 'Out of stock' }}
+                                    {{ product.available_items_count > 0 ? `${product.available_items_count} ${t('shop.in_stock')}` : t('shop.out_of_stock') }}
                                 </span>
                             </div>
 
@@ -102,7 +96,7 @@ const breadcrumbs = () => {
                             </h1>
 
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                                Sold by
+                                {{ t('product.seller') }}:
                                 <Link
                                     v-if="product.seller"
                                     :href="route('shop.seller', product.seller.id)"
@@ -118,49 +112,20 @@ const breadcrumbs = () => {
                             </div>
 
                             <div v-if="product.description" class="mb-6">
-                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Description</h3>
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">{{ t('product.description') }}</h3>
                                 <p class="text-gray-600 dark:text-gray-400 text-sm whitespace-pre-wrap">{{ product.description }}</p>
                             </div>
 
-                            <!-- Add to Cart -->
-                            <div v-if="product.available_items_count > 0" class="space-y-4">
-                                <div class="flex items-center space-x-4">
-                                    <div class="flex items-center border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
-                                        <button
-                                            @click="decreaseQty"
-                                            class="px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-                                            :disabled="quantity <= 1"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-                                            </svg>
-                                        </button>
-                                        <span class="px-4 py-2.5 font-medium text-gray-900 dark:text-white border-x border-gray-200 dark:border-gray-600">
-                                            {{ quantity }}
-                                        </span>
-                                        <button
-                                            @click="increaseQty"
-                                            class="px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-                                            :disabled="quantity >= product.available_items_count"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <span class="text-sm text-gray-500 dark:text-gray-400">
-                                        Total: <span class="font-semibold text-gray-900 dark:text-white">${{ (parseFloat(product.price) * quantity).toFixed(2) }}</span>
-                                    </span>
-                                </div>
-
+                            <!-- Buy Button -->
+                            <div v-if="product.available_items_count > 0">
                                 <button
-                                    @click="addToCart"
+                                    @click="openBuyModal"
                                     class="w-full flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors"
                                 >
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
-                                    Add to Cart
+                                    {{ t('shop.buy_now') }}
                                 </button>
                             </div>
 
@@ -169,8 +134,26 @@ const breadcrumbs = () => {
                                     disabled
                                     class="w-full px-6 py-3 text-base font-medium text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded-xl cursor-not-allowed"
                                 >
-                                    Out of Stock
+                                    {{ t('shop.out_of_stock') }}
                                 </button>
+                            </div>
+
+                            <!-- Features -->
+                            <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                        <span>{{ t('product.instant_delivery') }}</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                        <span>{{ t('product.secure_payment') }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -178,7 +161,7 @@ const breadcrumbs = () => {
 
                 <!-- Related Products -->
                 <div v-if="relatedProducts.length > 0" class="mt-12">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Related Products</h2>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">{{ t('product.related_products') }}</h2>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <Link
                             v-for="related in relatedProducts"
@@ -216,11 +199,18 @@ const breadcrumbs = () => {
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                        Back to Shop
+                        {{ t('common.back') }}
                     </Link>
                 </div>
             </div>
         </div>
+
+        <!-- Buy Modal -->
+        <BuyModal
+            :show="showBuyModal"
+            :product="product"
+            @close="closeBuyModal"
+        />
     </AppLayout>
 </template>
 

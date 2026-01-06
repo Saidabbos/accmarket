@@ -10,7 +10,6 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
-use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
 use App\Http\Controllers\Shop\DisputeController;
 use App\Http\Controllers\Shop\DownloadController;
@@ -24,6 +23,14 @@ use Inertia\Inertia;
 
 // Redirect home to shop
 Route::redirect('/', '/shop');
+
+// Language switch route
+Route::get('/language/{locale}', function (string $locale) {
+    if (in_array($locale, ['en', 'ru'])) {
+        session()->put('locale', $locale);
+    }
+    return back();
+})->name('language.switch');
 
 
 Route::middleware('auth')->group(function () {
@@ -40,20 +47,11 @@ Route::prefix('shop')->name('shop.')->group(function () {
     Route::get('/seller/{seller}/products', [SellerController::class, 'products'])->name('seller.products');
 });
 
-// Cart routes
-Route::prefix('cart')->name('cart.')->group(function () {
-    Route::get('/', [CartController::class, 'index'])->name('index');
-    Route::post('/add', [CartController::class, 'add'])->name('add');
-    Route::patch('/update', [CartController::class, 'update'])->name('update');
-    Route::delete('/remove', [CartController::class, 'remove'])->name('remove');
-    Route::delete('/clear', [CartController::class, 'clear'])->name('clear');
-    Route::get('/count', [CartController::class, 'count'])->name('count');
-});
-
-// Checkout routes (authenticated)
-Route::middleware(['auth', 'verified'])->prefix('checkout')->name('checkout.')->group(function () {
-    Route::get('/', [CheckoutController::class, 'index'])->name('index');
-    Route::post('/process', [CheckoutController::class, 'process'])->name('process');
+// Direct checkout routes (public - supports guest checkout)
+Route::prefix('checkout')->name('checkout.')->group(function () {
+    Route::post('/direct', [CheckoutController::class, 'directCheckout'])->name('direct');
+    Route::get('/direct', [CheckoutController::class, 'showDirectCheckout'])->name('direct.show');
+    Route::post('/direct/process', [CheckoutController::class, 'processDirectCheckout'])->name('direct.process');
 });
 
 // Payment routes (authenticated)
@@ -62,6 +60,14 @@ Route::middleware(['auth', 'verified'])->prefix('payment')->name('payment.')->gr
     Route::post('/order/{order}/pay', [PaymentController::class, 'initiate'])->name('initiate');
     Route::get('/order/{order}/success', [PaymentController::class, 'success'])->name('success');
     Route::get('/order/{order}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
+});
+
+// Guest payment routes (token-based authentication)
+Route::prefix('payment/guest')->name('payment.guest.')->group(function () {
+    Route::get('/order/{order}', [PaymentController::class, 'guestShow'])->name('show');
+    Route::post('/order/{order}/pay', [PaymentController::class, 'guestInitiate'])->name('initiate');
+    Route::get('/order/{order}/success', [PaymentController::class, 'guestSuccess'])->name('success');
+    Route::get('/order/{order}/cancel', [PaymentController::class, 'guestCancel'])->name('cancel');
 });
 
 // Order history routes (authenticated)
