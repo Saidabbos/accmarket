@@ -48,18 +48,18 @@ const breadcrumbs = () => {
         <div class="py-8">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <!-- Breadcrumbs -->
-                <nav class="mb-6">
+                <nav class="mb-6 overflow-hidden">
                     <ol class="flex items-center space-x-2 text-sm">
                         <template v-for="(crumb, index) in breadcrumbs()" :key="crumb.name">
-                            <li v-if="index > 0" class="text-gray-300 dark:text-gray-600">/</li>
-                            <li>
+                            <li v-if="index > 0" class="text-gray-300 dark:text-gray-600 flex-shrink-0">/</li>
+                            <li class="flex-shrink-0">
                                 <Link :href="crumb.href" class="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                                     {{ crumb.name }}
                                 </Link>
                             </li>
                         </template>
-                        <li class="text-gray-300 dark:text-gray-600">/</li>
-                        <li class="text-gray-900 dark:text-white font-medium">{{ product.name }}</li>
+                        <li class="text-gray-300 dark:text-gray-600 flex-shrink-0">/</li>
+                        <li class="text-gray-900 dark:text-white font-medium truncate min-w-0" :title="product.name">{{ product.name }}</li>
                     </ol>
                 </nav>
 
@@ -91,7 +91,7 @@ const breadcrumbs = () => {
                                 </span>
                             </div>
 
-                            <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                            <h1 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2" :title="product.name">
                                 {{ product.name }}
                             </h1>
 
@@ -218,6 +218,12 @@ const breadcrumbs = () => {
 .line-clamp-1 {
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

@@ -159,59 +159,59 @@ const closeBuyModal = () => {
                         </div>
 
                         <!-- Product List -->
-                        <div v-if="products.data.length > 0" class="space-y-2">
+                        <div v-if="products.data.length > 0" class="space-y-1.5">
                             <div
                                 v-for="product in products.data"
                                 :key="product.id"
                                 class="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors"
                             >
-                                <div class="flex items-center gap-4 p-3">
+                                <div class="flex items-center gap-3 p-2.5 sm:p-3">
                                     <!-- Product Icon -->
                                     <Link :href="route('shop.product', product.id)" class="flex-shrink-0">
-                                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                             </svg>
                                         </div>
                                     </Link>
 
                                     <!-- Product Info -->
-                                    <div class="flex-1 min-w-0">
+                                    <div class="flex-1 min-w-0 overflow-hidden">
                                         <Link :href="route('shop.product', product.id)">
-                                            <h3 class="font-medium text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                            <h3 class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1" :title="product.name">
                                                 {{ product.name }}
                                             </h3>
                                         </Link>
-                                        <div class="flex items-center gap-3 mt-1">
-                                            <span class="text-xs text-gray-500 dark:text-gray-400">
-                                                {{ product.category?.name }}
-                                            </span>
+                                        <div class="flex items-center gap-2 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                            <span class="truncate max-w-[100px]">{{ product.category?.name }}</span>
+                                            <span class="text-gray-300 dark:text-gray-600">•</span>
                                             <StarRating
                                                 :rating="product.reviews_avg_rating || 0"
                                                 :reviews-count="product.reviews_count || 0"
                                                 size="xs"
                                             />
-                                            <span class="text-xs text-emerald-600 dark:text-emerald-400">
+                                            <span class="text-gray-300 dark:text-gray-600 hidden sm:inline">•</span>
+                                            <span class="text-emerald-600 dark:text-emerald-400 hidden sm:inline">
                                                 {{ product.available_items_count }} {{ t('shop.in_stock') }}
                                             </span>
                                         </div>
                                     </div>
 
                                     <!-- Price & Actions -->
-                                    <div class="flex items-center gap-3">
-                                        <div class="text-lg font-bold text-gray-900 dark:text-white">
+                                    <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                                        <div class="text-base sm:text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                             ${{ parseFloat(product.price).toFixed(2) }}
                                         </div>
                                         <button
                                             v-if="product.available_items_count > 0"
                                             @click.prevent="openBuyModal(product)"
-                                            class="px-4 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors"
+                                            class="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors whitespace-nowrap"
                                         >
                                             {{ t('shop.buy_now') }}
                                         </button>
                                         <span
                                             v-else
-                                            class="px-3 py-1.5 text-sm font-medium text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded-md"
+                                            class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded-md whitespace-nowrap"
                                         >
                                             {{ t('shop.out_of_stock') }}
                                         </span>
