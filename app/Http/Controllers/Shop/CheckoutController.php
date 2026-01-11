@@ -108,7 +108,8 @@ class CheckoutController extends Controller
     {
         $directCheckout = session('direct_checkout');
 
-        if (empty($directCheckout)) {
+        if (empty($directCheckout) || !isset($directCheckout['product_id'])) {
+            session()->forget('direct_checkout');
             return redirect()->route('shop.index');
         }
 
@@ -139,7 +140,8 @@ class CheckoutController extends Controller
     {
         $directCheckout = session('direct_checkout');
 
-        if (empty($directCheckout)) {
+        if (empty($directCheckout) || !isset($directCheckout['product_id'])) {
+            session()->forget('direct_checkout');
             return redirect()->route('shop.index');
         }
 

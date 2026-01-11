@@ -40,8 +40,8 @@ return [
     ],
 
     'file_upload' => [
-        'max_size_mb' => env('FILE_UPLOAD_MAX_SIZE_MB', 10),
-        'max_size_kb' => env('FILE_UPLOAD_MAX_SIZE_KB', 10240),
+        'max_size_mb' => env('FILE_UPLOAD_MAX_SIZE_MB', 100),
+        'max_size_kb' => env('FILE_UPLOAD_MAX_SIZE_KB', 102400),
         'allowed_extensions' => ['csv', 'txt', 'json', 'xlsx', 'xls'],
         'allowed_mimes' => 'csv,txt,json,xlsx,xls',
         'batch_size' => env('FILE_UPLOAD_BATCH_SIZE', 500),

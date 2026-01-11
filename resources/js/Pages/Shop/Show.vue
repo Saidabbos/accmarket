@@ -91,7 +91,7 @@ const breadcrumbs = () => {
                                 </span>
                             </div>
 
-                            <h1 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2" :title="product.name">
+                            <h1 class="text-base lg:text-lg font-bold text-gray-900 dark:text-white mb-2 leading-snug">
                                 {{ product.name }}
                             </h1>
 
@@ -177,7 +177,7 @@ const breadcrumbs = () => {
                                 </div>
                             </div>
                             <div class="p-3">
-                                <h3 class="font-medium text-sm text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
+                                <h3 class="font-medium text-xs text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-tight">
                                     {{ related.name }}
                                 </h3>
                                 <div class="mt-2 flex items-center justify-between">
@@ -214,17 +214,3 @@ const breadcrumbs = () => {
     </AppLayout>
 </template>
 
-<style scoped>
-.line-clamp-1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-</style>

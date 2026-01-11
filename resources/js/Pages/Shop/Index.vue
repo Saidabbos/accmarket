@@ -178,7 +178,7 @@ const closeBuyModal = () => {
                                     <!-- Product Info -->
                                     <div class="flex-1 min-w-0 overflow-hidden">
                                         <Link :href="route('shop.product', product.id)">
-                                            <h3 class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1" :title="product.name">
+                                            <h3 class="text-xs sm:text-sm font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-tight">
                                                 {{ product.name }}
                                             </h3>
                                         </Link>
@@ -271,17 +271,3 @@ const closeBuyModal = () => {
     </AppLayout>
 </template>
 
-<style scoped>
-.line-clamp-1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-</style>
