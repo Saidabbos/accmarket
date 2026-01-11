@@ -1,5 +1,6 @@
 <script setup>
 import { Head, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -35,6 +36,27 @@ const formatDate = (date) => {
         minute: '2-digit',
     });
 };
+
+// Group order items by product
+const groupedItems = computed(() => {
+    const groups = {};
+    props.order.items?.forEach(item => {
+        const productId = item.product_item?.product?.id || item.id;
+        const productName = item.product_item?.product?.name || 'Digital Item';
+
+        if (!groups[productId]) {
+            groups[productId] = {
+                productName,
+                quantity: 0,
+                totalPrice: 0,
+                unitPrice: parseFloat(item.price),
+            };
+        }
+        groups[productId].quantity += item.quantity || 1;
+        groups[productId].totalPrice += parseFloat(item.price) * (item.quantity || 1);
+    });
+    return Object.values(groups);
+});
 
 // Choose layout based on guest status
 const LayoutComponent = props.isGuest ? AppLayout : AuthenticatedLayout;
@@ -89,8 +111,8 @@ const LayoutComponent = props.isGuest ? AppLayout : AuthenticatedLayout;
                         <h4 class="font-medium text-gray-900 dark:text-white mb-4">Order Items</h4>
                         <div class="space-y-3">
                             <div
-                                v-for="item in order.items"
-                                :key="item.id"
+                                v-for="(item, index) in groupedItems"
+                                :key="index"
                                 class="flex items-center justify-between py-2"
                             >
                                 <div class="flex items-center space-x-3">
@@ -101,13 +123,15 @@ const LayoutComponent = props.isGuest ? AppLayout : AuthenticatedLayout;
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-900 dark:text-white">
-                                            {{ item.product_item?.product?.name || 'Digital Item' }}
+                                            {{ item.productName }}
                                         </p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">Qty: {{ item.quantity }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                            {{ item.quantity }} × ${{ item.unitPrice.toFixed(2) }}
+                                        </p>
                                     </div>
                                 </div>
                                 <p class="font-medium text-gray-900 dark:text-white">
-                                    ${{ parseFloat(item.price).toFixed(2) }}
+                                    ${{ item.totalPrice.toFixed(2) }}
                                 </p>
                             </div>
                         </div>
