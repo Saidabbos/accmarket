@@ -136,7 +136,8 @@ class PaymentController extends Controller
      */
     protected function validateGuestToken(Order $order, Request $request): bool
     {
-        $token = $request->query('token');
+        // Token can come from query string (GET) or request body (POST)
+        $token = $request->input('token') ?? $request->query('token');
         return $order->isGuestOrder() && $order->guest_token === $token;
     }
 

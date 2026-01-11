@@ -10,7 +10,7 @@ services:
     extra_hosts:
       # For WSL2 + Docker: this allows container to reach Windows host
       # The IP is your WSL2 host IP (run: ip route | grep default | awk '{print $3}')
-      - "host.docker.internal:host-gateway"
+      - "172.21.192.1:host-gateway"
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -27,7 +27,7 @@ services:
       - MAIL_FROM_ADDRESS=noreply@marketplace.local
       # Xdebug for PhpStorm
       - XDEBUG_MODE=debug
-      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 idekey=PHPSTORM
+      - XDEBUG_CONFIG=client_host=172.21.192.1 client_port=9003 idekey=PHPSTORM
       - PHP_IDE_CONFIG=serverName=mpa-docker
     volumes:
       - ./:/app
