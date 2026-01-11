@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { Head, useForm, router, Link } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import debounce from 'lodash/debounce';
 
 const props = defineProps({
@@ -99,139 +99,140 @@ const importAllTranslations = () => {
 <template>
     <Head title="Translations" />
 
-    <AuthenticatedLayout>
+    <AdminLayout>
         <template #header>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Translations</h1>
+        </template>
+
+        <div class="space-y-6">
+            <!-- Header -->
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                    Translations
-                </h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Manage translations for all languages.
+                </p>
                 <div class="flex items-center gap-2">
                     <button
                         @click="importAllTranslations"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                     >
                         Import All
                     </button>
                     <button
                         @click="openAddModal"
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
                     >
                         Add Translation
                     </button>
                 </div>
             </div>
-        </template>
 
-        <div class="py-6">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <!-- Filters -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Language</label>
-                            <select
-                                v-model="locale"
-                                class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            >
-                                <option v-for="lang in languages" :key="lang.code" :value="lang.code">
-                                    {{ lang.name }} ({{ lang.code }})
-                                </option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Group</label>
-                            <select
-                                v-model="group"
-                                class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            >
-                                <option value="">All Groups</option>
-                                <option v-for="g in groups" :key="g" :value="g">
-                                    {{ g }}
-                                </option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Search</label>
-                            <input
-                                v-model="search"
-                                type="text"
-                                placeholder="Search key or value..."
-                                class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
+            <!-- Filters -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Language</label>
+                        <select
+                            v-model="locale"
+                            class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                        >
+                            <option v-for="lang in languages" :key="lang.code" :value="lang.code">
+                                {{ lang.name }} ({{ lang.code }})
+                            </option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Group</label>
+                        <select
+                            v-model="group"
+                            class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                        >
+                            <option value="">All Groups</option>
+                            <option v-for="g in groups" :key="g" :value="g">
+                                {{ g }}
+                            </option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Search</label>
+                        <input
+                            v-model="search"
+                            type="text"
+                            placeholder="Search key or value..."
+                            class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                        />
                     </div>
                 </div>
+            </div>
 
-                <!-- Translations Table -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900/50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Group</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Key</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Value</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr v-for="translation in translations.data" :key="translation.id">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <span class="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono text-xs">
-                                        {{ translation.group }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-mono">
-                                    {{ translation.key }}
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 max-w-md truncate">
-                                    {{ translation.value }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button
-                                        @click="openEditModal(translation)"
-                                        class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-3"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        @click="deleteTranslation(translation)"
-                                        class="text-red-600 dark:text-red-400 hover:text-red-900"
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr v-if="translations.data.length === 0">
-                                <td colspan="4" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                    No translations found.
-                                    <button @click="importTranslations" class="text-indigo-600 dark:text-indigo-400 hover:underline ml-1">
-                                        Import from file?
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- Translations Table -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-900/50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Group</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Key</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Value</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tr v-for="translation in translations.data" :key="translation.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span class="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono text-xs">
+                                    {{ translation.group }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-mono">
+                                {{ translation.key }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 max-w-md">
+                                <span class="line-clamp-2">{{ translation.value }}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button
+                                    @click="openEditModal(translation)"
+                                    class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 mr-3"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    @click="deleteTranslation(translation)"
+                                    class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                                >
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                        <tr v-if="translations.data.length === 0">
+                            <td colspan="4" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                No translations found.
+                                <button @click="importTranslations" class="text-indigo-600 dark:text-indigo-400 hover:underline ml-1">
+                                    Import from file?
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
-                    <!-- Pagination -->
-                    <div v-if="translations.links && translations.links.length > 3" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-center space-x-1">
-                            <template v-for="link in translations.links" :key="link.label">
-                                <Link
-                                    v-if="link.url"
-                                    :href="link.url"
-                                    class="px-3 py-1.5 text-sm rounded-lg transition-colors"
-                                    :class="link.active
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                                    v-html="link.label"
-                                />
-                                <span
-                                    v-else
-                                    class="px-3 py-1.5 text-sm rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500"
-                                    v-html="link.label"
-                                />
-                            </template>
-                        </div>
+                <!-- Pagination -->
+                <div v-if="translations.links && translations.links.length > 3" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-center space-x-1">
+                        <template v-for="link in translations.links" :key="link.label">
+                            <Link
+                                v-if="link.url"
+                                :href="link.url"
+                                class="px-3 py-1.5 text-sm rounded-lg transition-colors"
+                                :class="link.active
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                                v-html="link.label"
+                            />
+                            <span
+                                v-else
+                                class="px-3 py-1.5 text-sm rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500"
+                                v-html="link.label"
+                            />
+                        </template>
                     </div>
                 </div>
             </div>
@@ -250,7 +251,7 @@ const importAllTranslations = () => {
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
                                     <select
                                         v-model="addForm.locale"
-                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                     >
                                         <option v-for="lang in languages" :key="lang.code" :value="lang.code">
                                             {{ lang.name }}
@@ -263,7 +264,7 @@ const importAllTranslations = () => {
                                         v-model="addForm.group"
                                         type="text"
                                         placeholder="nav, shop, auth..."
-                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                     />
                                     <p v-if="addForm.errors.group" class="mt-1 text-sm text-red-600">{{ addForm.errors.group }}</p>
                                 </div>
@@ -274,7 +275,7 @@ const importAllTranslations = () => {
                                     v-model="addForm.key"
                                     type="text"
                                     placeholder="login, register..."
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                 />
                                 <p v-if="addForm.errors.key" class="mt-1 text-sm text-red-600">{{ addForm.errors.key }}</p>
                             </div>
@@ -283,7 +284,7 @@ const importAllTranslations = () => {
                                 <textarea
                                     v-model="addForm.value"
                                     rows="3"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                 ></textarea>
                                 <p v-if="addForm.errors.value" class="mt-1 text-sm text-red-600">{{ addForm.errors.value }}</p>
                             </div>
@@ -292,14 +293,14 @@ const importAllTranslations = () => {
                             <button
                                 type="button"
                                 @click="closeAddModal"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 :disabled="addForm.processing"
-                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
                             >
                                 {{ addForm.processing ? 'Adding...' : 'Add Translation' }}
                             </button>
@@ -324,7 +325,7 @@ const importAllTranslations = () => {
                                         :value="editingTranslation.group"
                                         type="text"
                                         disabled
-                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white bg-gray-100"
+                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-gray-300 bg-gray-100 cursor-not-allowed"
                                     />
                                 </div>
                                 <div>
@@ -333,7 +334,7 @@ const importAllTranslations = () => {
                                         :value="editingTranslation.key"
                                         type="text"
                                         disabled
-                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white bg-gray-100"
+                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-gray-300 bg-gray-100 cursor-not-allowed"
                                     />
                                 </div>
                             </div>
@@ -342,7 +343,7 @@ const importAllTranslations = () => {
                                 <textarea
                                     v-model="editForm.value"
                                     rows="4"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                 ></textarea>
                                 <p v-if="editForm.errors.value" class="mt-1 text-sm text-red-600">{{ editForm.errors.value }}</p>
                             </div>
@@ -351,14 +352,14 @@ const importAllTranslations = () => {
                             <button
                                 type="button"
                                 @click="closeEditModal"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 :disabled="editForm.processing"
-                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
                             >
                                 {{ editForm.processing ? 'Saving...' : 'Save Changes' }}
                             </button>
@@ -367,5 +368,14 @@ const importAllTranslations = () => {
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </AdminLayout>
 </template>
+
+<style scoped>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
