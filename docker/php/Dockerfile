@@ -56,9 +56,15 @@ WORKDIR /app
 # ============================================================================
 FROM base AS development
 
+# Install Xdebug
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS linux-headers \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug \
+    && apk del .build-deps
+
 # Copy development PHP config
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/99-php.ini
-# Xdebug will be added in future iterations with proper build tools
+COPY docker/php/xdebug.ini /usr/local/etc/php/conf.d/20-xdebug.ini
 
 # Copy entrypoint script
 COPY docker/php/entrypoint.sh /usr/local/bin/

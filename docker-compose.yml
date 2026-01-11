@@ -7,6 +7,8 @@ services:
       target: development
     ports:
       - "9001:9000"
+    extra_hosts:
+      - "172.21.192.1:host-gateway"
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -21,6 +23,9 @@ services:
       - SESSION_DRIVER=database
       - MAIL_MAILER=log
       - MAIL_FROM_ADDRESS=noreply@marketplace.local
+      # Xdebug environment variables
+      - XDEBUG_MODE=debug
+      - XDEBUG_CONFIG=client_host=172.21.192.1 client_port=9003
     volumes:
       - ./:/app
     depends_on:

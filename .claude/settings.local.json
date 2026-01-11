@@ -15,7 +15,21 @@
       "Bash(ls:*)",
       "Bash(dir /b \"c:\\\\Users\\\\ssula\\\\projects\\\\mpa\\\\*.md\")",
       "Bash(npx vite build)",
-      "Bash(wsl -e bash -c:*)"
+      "Bash(wsl -e bash -c:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker inspect:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker builder prune:*)",
+      "Bash(ssh root@147.45.154.148 \"cd /var/www/accmarket && git pull origin master\")",
+      "Bash(git reset:*)",
+      "Bash(if [ ! -d \".vscode\" ])",
+      "Bash(then mkdir -p .vscode)",
+      "Bash(fi)",
+      "Bash(composer require:*)",
+      "Bash(php composer.phar require:*)",
+      "Bash(C:/Users/ssula/scoop/apps/php/current/php.exe C:/Users/ssula/scoop/apps/composer/current/composer.phar require:*)"
     ]
   }
 }
