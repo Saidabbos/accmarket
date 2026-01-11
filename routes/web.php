@@ -4,9 +4,11 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DatabaseBackupController as AdminDatabaseBackupController;
 use App\Http\Controllers\Admin\DisputeController as AdminDisputeController;
+use App\Http\Controllers\Admin\LanguageController as AdminLanguageController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\TranslationController as AdminTranslationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
@@ -26,7 +28,8 @@ Route::redirect('/', '/shop');
 
 // Language switch route
 Route::get('/language/{locale}', function (string $locale) {
-    if (in_array($locale, ['en', 'ru'])) {
+    $activeLanguages = \App\Models\Language::getActive()->pluck('code')->toArray();
+    if (in_array($locale, $activeLanguages)) {
         session()->put('locale', $locale);
     }
     return back();
@@ -166,6 +169,28 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('dashboard')->name
     Route::get('disputes/{dispute}', [AdminDisputeController::class, 'show'])->name('disputes.show');
     Route::patch('disputes/{dispute}/status', [AdminDisputeController::class, 'updateStatus'])->name('disputes.status');
     Route::post('disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
+
+    // Language management
+    Route::prefix('languages')->name('languages.')->group(function () {
+        Route::get('/', [AdminLanguageController::class, 'index'])->name('index');
+        Route::post('/', [AdminLanguageController::class, 'store'])->name('store');
+        Route::put('/{language}', [AdminLanguageController::class, 'update'])->name('update');
+        Route::delete('/{language}', [AdminLanguageController::class, 'destroy'])->name('destroy');
+        Route::patch('/{language}/toggle', [AdminLanguageController::class, 'toggleActive'])->name('toggle');
+        Route::patch('/{language}/default', [AdminLanguageController::class, 'setDefault'])->name('default');
+        Route::post('/reorder', [AdminLanguageController::class, 'reorder'])->name('reorder');
+    });
+
+    // Translation management
+    Route::prefix('translations')->name('translations.')->group(function () {
+        Route::get('/', [AdminTranslationController::class, 'index'])->name('index');
+        Route::post('/', [AdminTranslationController::class, 'store'])->name('store');
+        Route::put('/{translation}', [AdminTranslationController::class, 'update'])->name('update');
+        Route::delete('/{translation}', [AdminTranslationController::class, 'destroy'])->name('destroy');
+        Route::post('/import', [AdminTranslationController::class, 'import'])->name('import');
+        Route::post('/import-all', [AdminTranslationController::class, 'importAll'])->name('import-all');
+        Route::post('/bulk-update', [AdminTranslationController::class, 'bulkUpdate'])->name('bulk-update');
+    });
 });
 
 require __DIR__.'/auth.php';

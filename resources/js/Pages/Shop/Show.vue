@@ -42,7 +42,11 @@ const breadcrumbs = () => {
 </script>
 
 <template>
-    <Head :title="product.name" />
+    <Head>
+        <title>{{ product.meta_title || product.name }}</title>
+        <meta v-if="product.meta_description" name="description" :content="product.meta_description" />
+        <meta v-if="product.meta_keywords" name="keywords" :content="product.meta_keywords" />
+    </Head>
 
     <AppLayout>
         <div class="py-8">

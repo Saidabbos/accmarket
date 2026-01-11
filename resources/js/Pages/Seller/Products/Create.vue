@@ -14,6 +14,9 @@ const props = defineProps({
 const form = useForm({
     name: '',
     description: '',
+    meta_title: '',
+    meta_description: '',
+    meta_keywords: '',
     price: '',
     category_id: '',
     items_file: null,
@@ -78,10 +81,59 @@ const flatCategories = () => {
                                 id="description"
                                 v-model="form.description"
                                 rows="4"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                 placeholder="Describe your product..."
                             ></textarea>
                             <InputError :message="form.errors.description" class="mt-2" />
+                        </div>
+
+                        <!-- SEO Fields -->
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">SEO Settings (Optional)</h3>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <InputLabel for="meta_title" value="Meta Title (for search engines)" />
+                                    <TextInput
+                                        id="meta_title"
+                                        v-model="form.meta_title"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        placeholder="Leave empty to use product name"
+                                    />
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        {{ form.meta_title.length }}/60 characters recommended
+                                    </p>
+                                    <InputError :message="form.errors.meta_title" class="mt-2" />
+                                </div>
+
+                                <div>
+                                    <InputLabel for="meta_description" value="Meta Description" />
+                                    <textarea
+                                        id="meta_description"
+                                        v-model="form.meta_description"
+                                        rows="2"
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        placeholder="Brief description for search results..."
+                                    ></textarea>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        {{ form.meta_description.length }}/160 characters recommended
+                                    </p>
+                                    <InputError :message="form.errors.meta_description" class="mt-2" />
+                                </div>
+
+                                <div>
+                                    <InputLabel for="meta_keywords" value="Meta Keywords" />
+                                    <TextInput
+                                        id="meta_keywords"
+                                        v-model="form.meta_keywords"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        placeholder="keyword1, keyword2, keyword3..."
+                                    />
+                                    <InputError :message="form.errors.meta_keywords" class="mt-2" />
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Price -->
