@@ -156,9 +156,9 @@ class CheckoutController extends Controller
             $product = Product::findOrFail($directCheckout['product_id']);
             $quantity = $directCheckout['quantity'];
 
-            // Temporarily add to cart for processing
+            // Temporarily add to cart for processing (format expected by ProcessCheckoutAction)
             session(['cart' => [
-                $product->id => ['quantity' => $quantity],
+                ['product_id' => $product->id, 'quantity' => $quantity],
             ]]);
 
             $action = new \App\Actions\Shop\ProcessCheckoutAction();
