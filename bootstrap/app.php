@@ -29,6 +29,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'cloudflare.verify' => \App\Http\Middleware\VerifyCloudflareRequest::class,
             'cloudflare.throttle' => \App\Http\Middleware\CloudflareRateLimiting::class,
         ]);
+
+        // Exclude payment IPN webhook from CSRF verification (external callback from NowPayments)
+        $middleware->validateCsrfTokens(except: [
+            'payment/ipn',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
