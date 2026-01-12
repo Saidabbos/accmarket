@@ -125,6 +125,16 @@ class NowPaymentsService
             'payment_id' => $paymentId,
         ]);
 
+        // Don't process if payment is already completed (payment_status = 'completed' after markAsPaid)
+        if ($order->payment_status === 'completed') {
+            Log::info('IPN: Ignoring webhook for already completed payment', [
+                'order_id' => $order->id,
+                'current_status' => $order->payment_status,
+                'webhook_status' => $paymentStatus,
+            ]);
+            return true;
+        }
+
         switch ($paymentStatus) {
             case 'finished':
             case 'confirmed':
@@ -132,7 +142,7 @@ class NowPaymentsService
                 break;
 
             case 'partially_paid':
-                $order->update(['payment_status' => 'processing']);
+                $order->update(['payment_status' => 'partially_paid']);
                 break;
 
             case 'failed':
