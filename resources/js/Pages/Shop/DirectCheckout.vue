@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
@@ -10,45 +10,20 @@ const props = defineProps({
     product: Object,
     quantity: Number,
     total: Number,
-    isGuest: {
-        type: Boolean,
-        default: false,
-    },
-});
-
-const form = useForm({
-    guest_email: '',
 });
 
 const isProcessing = ref(false);
 
-const canSubmit = computed(() => {
-    if (props.isGuest) {
-        // For guest, require valid email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(form.guest_email) && !isProcessing.value;
-    }
-    return !isProcessing.value;
-});
-
 const processCheckout = () => {
-    if (!canSubmit.value) return;
+    if (isProcessing.value) return;
 
     isProcessing.value = true;
 
-    if (props.isGuest) {
-        form.post(route('checkout.direct.process'), {
-            onFinish: () => {
-                isProcessing.value = false;
-            },
-        });
-    } else {
-        router.post(route('checkout.direct.process'), {}, {
-            onFinish: () => {
-                isProcessing.value = false;
-            },
-        });
-    }
+    router.post(route('checkout.direct.process'), {}, {
+        onFinish: () => {
+            isProcessing.value = false;
+        },
+    });
 };
 </script>
 
@@ -87,30 +62,6 @@ const processCheckout = () => {
                                     <p class="font-semibold text-gray-900 dark:text-white">${{ total.toFixed(2) }}</p>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">${{ parseFloat(product.price).toFixed(2) }} x {{ quantity }}</p>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Guest Email Input -->
-                        <div v-if="isGuest" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ t('checkout.guest_info') }}</h3>
-                            <div>
-                                <label for="guest_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    {{ t('checkout.email_for_order') }} <span class="text-red-500">*</span>
-                                </label>
-                                <input
-                                    id="guest_email"
-                                    v-model="form.guest_email"
-                                    type="email"
-                                    required
-                                    :placeholder="t('checkout.email_placeholder')"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
-                                />
-                                <p v-if="form.errors.guest_email" class="mt-2 text-sm text-red-600 dark:text-red-400">
-                                    {{ form.errors.guest_email }}
-                                </p>
-                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ t('checkout.email_notice') }}
-                                </p>
                             </div>
                         </div>
 
@@ -165,7 +116,7 @@ const processCheckout = () => {
 
                             <button
                                 @click="processCheckout"
-                                :disabled="!canSubmit"
+                                :disabled="isProcessing"
                                 class="mt-6 w-full flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                                 <svg v-if="isProcessing" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">

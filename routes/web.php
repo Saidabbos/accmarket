@@ -50,8 +50,8 @@ Route::prefix('shop')->name('shop.')->group(function () {
     Route::get('/seller/{seller}/products', [SellerController::class, 'products'])->name('seller.products');
 });
 
-// Direct checkout routes (public - supports guest checkout)
-Route::prefix('checkout')->name('checkout.')->group(function () {
+// Checkout routes (authenticated only)
+Route::middleware(['auth', 'verified'])->prefix('checkout')->name('checkout.')->group(function () {
     Route::post('/direct', [CheckoutController::class, 'directCheckout'])->name('direct');
     Route::get('/direct', [CheckoutController::class, 'showDirectCheckout'])->name('direct.show');
     Route::post('/direct/process', [CheckoutController::class, 'processDirectCheckout'])->name('direct.process');
@@ -63,14 +63,6 @@ Route::middleware(['auth', 'verified'])->prefix('payment')->name('payment.')->gr
     Route::post('/order/{order}/pay', [PaymentController::class, 'initiate'])->name('initiate');
     Route::get('/order/{order}/success', [PaymentController::class, 'success'])->name('success');
     Route::get('/order/{order}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
-});
-
-// Guest payment routes (token-based authentication)
-Route::prefix('payment/guest')->name('payment.guest.')->group(function () {
-    Route::get('/order/{order}', [PaymentController::class, 'guestShow'])->name('show');
-    Route::post('/order/{order}/pay', [PaymentController::class, 'guestInitiate'])->name('initiate');
-    Route::get('/order/{order}/success', [PaymentController::class, 'guestSuccess'])->name('success');
-    Route::get('/order/{order}/cancel', [PaymentController::class, 'guestCancel'])->name('cancel');
 });
 
 // Order history routes (authenticated)

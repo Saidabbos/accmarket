@@ -2,29 +2,13 @@
 import { Head, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import AppLayout from '@/Layouts/AppLayout.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
 
 const props = defineProps({
     order: Object,
-    isGuest: {
-        type: Boolean,
-        default: false,
-    },
-    guestToken: {
-        type: String,
-        default: null,
-    },
 });
 
 const initiatePayment = () => {
-    if (props.isGuest) {
-        router.post(route('payment.guest.initiate', props.order.id), {
-            token: props.guestToken,
-        });
-    } else {
-        router.post(route('payment.initiate', props.order.id));
-    }
+    router.post(route('payment.initiate', props.order.id));
 };
 
 const formatDate = (date) => {
@@ -57,16 +41,13 @@ const groupedItems = computed(() => {
     });
     return Object.values(groups);
 });
-
-// Choose layout based on guest status
-const LayoutComponent = props.isGuest ? AppLayout : AuthenticatedLayout;
 </script>
 
 <template>
     <Head :title="`Pay Order #${order.order_number}`" />
 
-    <component :is="LayoutComponent">
-        <template #header v-if="!isGuest">
+    <AuthenticatedLayout>
+        <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100">
                 Complete Payment
             </h2>
@@ -74,12 +55,6 @@ const LayoutComponent = props.isGuest ? AppLayout : AuthenticatedLayout;
 
         <div class="py-8 lg:py-12">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                <!-- Guest Header -->
-                <div v-if="isGuest" class="mb-6">
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Complete Payment</h1>
-                    <p class="mt-1 text-gray-600 dark:text-gray-400">Complete your order payment below</p>
-                </div>
-
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <!-- Order Header -->
                     <div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
@@ -201,5 +176,5 @@ const LayoutComponent = props.isGuest ? AppLayout : AuthenticatedLayout;
                 </div>
             </div>
         </div>
-    </component>
+    </AuthenticatedLayout>
 </template>

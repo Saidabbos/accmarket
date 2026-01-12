@@ -129,7 +129,6 @@ class CheckoutController extends Controller
             'product' => $product,
             'quantity' => $quantity,
             'total' => $total,
-            'isGuest' => !Auth::check(),
         ]);
     }
 
@@ -145,13 +144,6 @@ class CheckoutController extends Controller
             return redirect()->route('shop.index');
         }
 
-        // Validate guest email if not authenticated
-        if (!Auth::check()) {
-            $request->validate([
-                'guest_email' => 'required|email|max:255',
-            ]);
-        }
-
         try {
             $product = Product::findOrFail($directCheckout['product_id']);
             $quantity = $directCheckout['quantity'];
@@ -162,27 +154,12 @@ class CheckoutController extends Controller
             ]]);
 
             $action = new \App\Actions\Shop\ProcessCheckoutAction();
-            $checkoutData = [
+            $order = $action->execute([
                 'user_id' => Auth::id(),
-            ];
-
-            // Add guest email if not authenticated
-            if (!Auth::check()) {
-                $checkoutData['guest_email'] = $request->guest_email;
-            }
-
-            $order = $action->execute($checkoutData);
+            ]);
 
             // Clear direct checkout session
             session()->forget('direct_checkout');
-
-            // For guest orders, redirect with token
-            if ($order->isGuestOrder()) {
-                return redirect()->route('payment.guest.show', [
-                    'order' => $order->id,
-                    'token' => $order->guest_token,
-                ])->with('success', 'Order created successfully. Please complete payment.');
-            }
 
             return redirect()->route('payment.show', $order)
                 ->with('success', 'Order created successfully. Please complete payment.');
