@@ -139,6 +139,13 @@ return [
     'auth' => [
         'login' => 'Войти',
         'login_subtitle' => 'С возвращением! Войдите в свой аккаунт.',
+        'telegram_login_subtitle' => 'Войдите безопасно через ваш Telegram аккаунт',
+        'login_with_telegram' => 'Войти через Telegram',
+        'telegram_login_info' => 'Нажмите кнопку выше для входа через Telegram',
+        'secure_login' => 'Безопасный вход',
+        'no_password_needed' => 'Пароль не нужен - используйте Telegram',
+        'telegram_encrypted' => 'Шифрованная аутентификация',
+        'instant_access' => 'Мгновенный доступ к аккаунту',
         'register' => 'Регистрация',
         'register_subtitle' => 'Присоединяйтесь и начните торговать цифровыми товарами.',
         'email' => 'Email',

@@ -139,6 +139,13 @@ return [
     'auth' => [
         'login' => 'Sign In',
         'login_subtitle' => 'Welcome back! Please sign in to your account.',
+        'telegram_login_subtitle' => 'Sign in securely using your Telegram account',
+        'login_with_telegram' => 'Login with Telegram',
+        'telegram_login_info' => 'Click the button above to login with your Telegram account',
+        'secure_login' => 'Secure Login',
+        'no_password_needed' => 'No password needed - use your Telegram account',
+        'telegram_encrypted' => 'End-to-end encrypted authentication',
+        'instant_access' => 'Instant access to your account',
         'register' => 'Create Account',
         'register_subtitle' => 'Join us today and start trading digital products.',
         'email' => 'Email',
