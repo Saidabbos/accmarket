@@ -1,5 +1,6 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
 const props = defineProps({
@@ -10,30 +11,71 @@ const props = defineProps({
 const form = useForm({
     name: props.category.name,
     description: props.category.description || '',
-    icon: props.category.icon || '',
+    icon: null,
+    remove_icon: false,
     parent_id: props.category.parent_id || '',
     sort_order: props.category.sort_order || 0,
     is_active: props.category.is_active,
 });
 
-const iconOptions = [
-    { value: '', label: 'None' },
-    { value: 'facebook', label: 'Facebook' },
-    { value: 'instagram', label: 'Instagram' },
-    { value: 'twitter', label: 'Twitter / X' },
-    { value: 'linkedin', label: 'LinkedIn' },
-    { value: 'tiktok', label: 'TikTok' },
-    { value: 'youtube', label: 'YouTube' },
-    { value: 'telegram', label: 'Telegram' },
-    { value: 'whatsapp', label: 'WhatsApp' },
-    { value: 'discord', label: 'Discord' },
-    { value: 'spotify', label: 'Spotify' },
-    { value: 'reddit', label: 'Reddit' },
-    { value: 'snapchat', label: 'Snapchat' },
-];
+const iconPreview = ref(null);
+const iconInput = ref(null);
+
+// Existing icon URL
+const existingIconUrl = computed(() => {
+    if (props.category.icon) {
+        return `/storage/${props.category.icon}`;
+    }
+    return null;
+});
+
+const showExistingIcon = computed(() => {
+    return existingIconUrl.value && !iconPreview.value && !form.remove_icon;
+});
+
+const handleIconChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        form.icon = file;
+        form.remove_icon = false;
+        iconPreview.value = URL.createObjectURL(file);
+    }
+};
+
+const removeIcon = () => {
+    form.icon = null;
+    form.remove_icon = true;
+    iconPreview.value = null;
+    if (iconInput.value) {
+        iconInput.value.value = '';
+    }
+};
+
+const removeNewIcon = () => {
+    form.icon = null;
+    iconPreview.value = null;
+    if (iconInput.value) {
+        iconInput.value.value = '';
+    }
+};
 
 const submit = () => {
-    form.put(route('admin.categories.update', props.category.id));
+    router.post(route('admin.categories.update', props.category.id), {
+        _method: 'put',
+        name: form.name,
+        description: form.description,
+        icon: form.icon,
+        remove_icon: form.remove_icon,
+        parent_id: form.parent_id,
+        sort_order: form.sort_order,
+        is_active: form.is_active,
+    }, {
+        forceFormData: true,
+        preserveScroll: true,
+        onError: (errors) => {
+            form.errors = errors;
+        },
+    });
 };
 </script>
 
@@ -105,21 +147,84 @@ const submit = () => {
                         <p v-if="form.errors.description" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.description }}</p>
                     </div>
 
-                    <!-- Icon -->
+                    <!-- Icon Upload -->
                     <div>
-                        <label for="icon" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            Social Network Icon <span class="text-gray-400">(Optional)</span>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Category Icon <span class="text-gray-400">(Optional)</span>
                         </label>
-                        <select
-                            id="icon"
-                            v-model="form.icon"
-                            class="w-full rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        >
-                            <option v-for="option in iconOptions" :key="option.value" :value="option.value">
-                                {{ option.label }}
-                            </option>
-                        </select>
-                        <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Select a social network icon to display with products in this category.</p>
+                        <div class="flex items-start gap-4">
+                            <!-- Existing Icon Preview -->
+                            <div
+                                v-if="showExistingIcon"
+                                class="relative w-20 h-20 rounded-lg border-2 border-gray-200 dark:border-gray-600 overflow-hidden flex-shrink-0"
+                            >
+                                <img
+                                    :src="existingIconUrl"
+                                    alt="Current icon"
+                                    class="w-full h-full object-cover"
+                                />
+                                <button
+                                    type="button"
+                                    @click="removeIcon"
+                                    class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                                    title="Remove icon"
+                                >
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <!-- New Icon Preview -->
+                            <div
+                                v-if="iconPreview"
+                                class="relative w-20 h-20 rounded-lg border-2 border-indigo-300 dark:border-indigo-600 overflow-hidden flex-shrink-0"
+                            >
+                                <img
+                                    :src="iconPreview"
+                                    alt="New icon preview"
+                                    class="w-full h-full object-cover"
+                                />
+                                <button
+                                    type="button"
+                                    @click="removeNewIcon"
+                                    class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                                    title="Remove new icon"
+                                >
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                                <span class="absolute bottom-0 left-0 right-0 bg-indigo-600 text-white text-xs text-center py-0.5">New</span>
+                            </div>
+                            <!-- Upload Area -->
+                            <div class="flex-1">
+                                <label
+                                    class="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                >
+                                    <div class="flex flex-col items-center justify-center py-2">
+                                        <svg class="w-6 h-6 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ showExistingIcon ? 'Click to replace' : 'Click to upload icon' }}
+                                        </p>
+                                    </div>
+                                    <input
+                                        ref="iconInput"
+                                        type="file"
+                                        class="hidden"
+                                        accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                                        @change="handleIconChange"
+                                    />
+                                </label>
+                            </div>
+                        </div>
+                        <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                            Recommended: 128x128px, PNG/WebP/SVG, max 512KB
+                        </p>
+                        <p v-if="form.remove_icon" class="mt-1.5 text-sm text-amber-600 dark:text-amber-400">
+                            Icon will be removed when you save.
+                        </p>
                         <p v-if="form.errors.icon" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.icon }}</p>
                     </div>
 

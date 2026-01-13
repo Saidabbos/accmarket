@@ -95,16 +95,33 @@ const iconColors = {
     default: 'bg-gradient-to-br from-indigo-500 to-purple-600',
 };
 
-const getCategoryIcon = (iconName) => {
-    if (!iconName) return socialIcons.default;
-    const key = iconName.toLowerCase();
+const getCategoryIcon = (iconPath) => {
+    // If no icon, return default SVG
+    if (!iconPath) return socialIcons.default;
+    // If it's a file path (uploaded image), return null (handled by img tag)
+    if (iconPath.includes('/') || iconPath.includes('.')) return null;
+    // Otherwise treat as social network key
+    const key = iconPath.toLowerCase();
     return socialIcons[key] || socialIcons.default;
 };
 
-const getCategoryIconColor = (iconName) => {
-    if (!iconName) return iconColors.default;
-    const key = iconName.toLowerCase();
+const getCategoryIconColor = (iconPath) => {
+    // If no icon, return default color
+    if (!iconPath) return iconColors.default;
+    // If it's a file path (uploaded image), no background needed
+    if (iconPath.includes('/') || iconPath.includes('.')) return '';
+    // Otherwise treat as social network key
+    const key = iconPath.toLowerCase();
     return iconColors[key] || iconColors.default;
+};
+
+const isUploadedIcon = (iconPath) => {
+    return iconPath && (iconPath.includes('/') || iconPath.includes('.'));
+};
+
+const getIconUrl = (iconPath) => {
+    if (!iconPath) return null;
+    return `/storage/${iconPath}`;
 };
 </script>
 
@@ -216,7 +233,20 @@ const getCategoryIconColor = (iconName) => {
                                 <div class="flex items-center gap-3 p-2.5 sm:p-3">
                                     <!-- Category Icon -->
                                     <Link :href="route('shop.product', product.id)" class="flex-shrink-0">
+                                        <!-- Uploaded Image Icon -->
                                         <div
+                                            v-if="isUploadedIcon(product.category?.icon)"
+                                            class="w-10 h-10 sm:w-11 sm:h-11 rounded-lg overflow-hidden"
+                                        >
+                                            <img
+                                                :src="getIconUrl(product.category?.icon)"
+                                                :alt="product.category?.name"
+                                                class="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <!-- SVG Icon (social networks or default) -->
+                                        <div
+                                            v-else
                                             class="w-10 h-10 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center text-white"
                                             :class="getCategoryIconColor(product.category?.icon)"
                                             v-html="getCategoryIcon(product.category?.icon)"

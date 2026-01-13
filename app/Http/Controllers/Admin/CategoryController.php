@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -43,6 +44,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'icon' => 'nullable|image|mimes:png,jpg,jpeg,webp,svg|max:512',
             'parent_id' => 'nullable|exists:categories,id',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
@@ -56,10 +58,16 @@ class CategoryController extends Controller
             $slug = $originalSlug . '-' . $counter++;
         }
 
+        $iconPath = null;
+        if ($request->hasFile('icon')) {
+            $iconPath = $request->file('icon')->store('categories', 'public');
+        }
+
         Category::create([
             'name' => $validated['name'],
             'slug' => $slug,
             'description' => $validated['description'] ?? '',
+            'icon' => $iconPath,
             'parent_id' => $validated['parent_id'],
             'sort_order' => $validated['sort_order'] ?? 0,
             'is_active' => $validated['is_active'] ?? true,
@@ -91,6 +99,8 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'icon' => 'nullable|image|mimes:png,jpg,jpeg,webp,svg|max:512',
+            'remove_icon' => 'nullable|boolean',
             'parent_id' => [
                 'nullable',
                 'exists:categories,id',
@@ -117,10 +127,27 @@ class CategoryController extends Controller
             $validated['slug'] = $slug;
         }
 
+        // Handle icon upload/removal
+        $iconPath = $category->icon;
+        if ($request->hasFile('icon')) {
+            // Delete old icon if exists
+            if ($category->icon) {
+                Storage::disk('public')->delete($category->icon);
+            }
+            $iconPath = $request->file('icon')->store('categories', 'public');
+        } elseif ($request->boolean('remove_icon')) {
+            // Remove icon if requested
+            if ($category->icon) {
+                Storage::disk('public')->delete($category->icon);
+            }
+            $iconPath = null;
+        }
+
         $category->update([
             'name' => $validated['name'],
             'slug' => $validated['slug'] ?? $category->slug,
             'description' => $validated['description'] ?? '',
+            'icon' => $iconPath,
             'parent_id' => $validated['parent_id'],
             'sort_order' => $validated['sort_order'] ?? 0,
             'is_active' => $validated['is_active'] ?? true,
