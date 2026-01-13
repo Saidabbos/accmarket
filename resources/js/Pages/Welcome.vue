@@ -106,8 +106,7 @@ const features = [
                                     Sign in
                                 </Link>
                                 <Link
-                                    v-if="canRegister"
-                                    :href="route('register')"
+                                    :href="route('login')"
                                     class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
                                 >
                                     Get started
@@ -143,7 +142,7 @@ const features = [
                             Browse Products
                         </Link>
                         <Link
-                            :href="route('register')"
+                            :href="route('login')"
                             class="w-full sm:w-auto px-8 py-3 text-base font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
                         >
                             Start Selling
@@ -315,10 +314,10 @@ const features = [
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
-                            :href="route('register')"
+                            :href="route('login')"
                             class="w-full sm:w-auto px-8 py-3 text-base font-medium text-indigo-600 bg-white rounded-xl hover:bg-indigo-50 transition-colors"
                         >
-                            Create Account
+                            Sign In
                         </Link>
                         <Link
                             :href="route('shop.index')"

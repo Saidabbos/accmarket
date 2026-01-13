@@ -267,7 +267,7 @@ const toggleDarkMode = () => {
                                     {{ t('nav.sign_in') }}
                                 </Link>
                                 <Link
-                                    :href="route('register')"
+                                    :href="route('login')"
                                     class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
                                 >
                                     {{ t('nav.get_started') }}
@@ -340,7 +340,7 @@ const toggleDarkMode = () => {
                                     {{ t('nav.sign_in') }}
                                 </Link>
                                 <Link
-                                    :href="route('register')"
+                                    :href="route('login')"
                                     class="block px-3 py-2 text-sm font-medium text-center text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
                                 >
                                     {{ t('nav.get_started') }}
