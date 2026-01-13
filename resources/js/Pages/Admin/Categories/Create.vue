@@ -9,10 +9,27 @@ const props = defineProps({
 const form = useForm({
     name: '',
     description: '',
+    icon: '',
     parent_id: '',
     sort_order: 0,
     is_active: true,
 });
+
+const iconOptions = [
+    { value: '', label: 'None' },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'twitter', label: 'Twitter / X' },
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'tiktok', label: 'TikTok' },
+    { value: 'youtube', label: 'YouTube' },
+    { value: 'telegram', label: 'Telegram' },
+    { value: 'whatsapp', label: 'WhatsApp' },
+    { value: 'discord', label: 'Discord' },
+    { value: 'spotify', label: 'Spotify' },
+    { value: 'reddit', label: 'Reddit' },
+    { value: 'snapchat', label: 'Snapchat' },
+];
 
 const submit = () => {
     form.post(route('admin.categories.store'));
@@ -72,6 +89,24 @@ const submit = () => {
                             placeholder="Brief description of this category..."
                         ></textarea>
                         <p v-if="form.errors.description" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.description }}</p>
+                    </div>
+
+                    <!-- Icon -->
+                    <div>
+                        <label for="icon" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Social Network Icon <span class="text-gray-400">(Optional)</span>
+                        </label>
+                        <select
+                            id="icon"
+                            v-model="form.icon"
+                            class="w-full rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        >
+                            <option v-for="option in iconOptions" :key="option.value" :value="option.value">
+                                {{ option.label }}
+                            </option>
+                        </select>
+                        <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Select a social network icon to display with products in this category.</p>
+                        <p v-if="form.errors.icon" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.icon }}</p>
                     </div>
 
                     <!-- Parent Category -->
