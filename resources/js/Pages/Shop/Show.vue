@@ -121,9 +121,22 @@ const getIconUrl = (iconPath) => {
 
 <template>
     <Head>
-        <title>{{ product.meta_title || product.name }}</title>
-        <meta v-if="product.meta_description" name="description" :content="product.meta_description" />
+        <title>{{ product.meta_title || product.name }} - Accssio</title>
+        <meta name="description" :content="product.meta_description || product.description || `Buy ${product.name} on Accssio - Digital Marketplace`" />
         <meta v-if="product.meta_keywords" name="keywords" :content="product.meta_keywords" />
+        <!-- Open Graph -->
+        <meta property="og:type" content="product" />
+        <meta property="og:title" :content="product.meta_title || product.name" />
+        <meta property="og:description" :content="product.meta_description || product.description || `Buy ${product.name} on Accssio`" />
+        <meta property="og:url" :content="route('shop.product', product.id)" />
+        <meta property="og:site_name" content="Accssio" />
+        <meta property="og:image" :content="product.category?.icon ? `/storage/${product.category.icon}` : '/images/og-image.png'" />
+        <meta property="product:price:amount" :content="product.price" />
+        <meta property="product:price:currency" content="USD" />
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" :content="product.meta_title || product.name" />
+        <meta name="twitter:description" :content="product.meta_description || product.description || `Buy ${product.name} on Accssio`" />
     </Head>
 
     <AppLayout>
