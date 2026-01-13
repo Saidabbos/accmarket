@@ -26,6 +26,9 @@ class User extends Authenticatable
         'status',
         'ban_reason',
         'banned_at',
+        'telegram_id',
+        'telegram_username',
+        'telegram_photo_url',
     ];
 
     /**
