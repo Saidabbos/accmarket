@@ -39,7 +39,7 @@ class NowPaymentsService
             'ipn_callback_url' => route('payment.ipn'),
             'success_url' => route('payment.success', $order),
             'cancel_url' => route('payment.cancel', $order),
-            'is_fee_paid_by_user' => false, // Seller pays the fee
+            'is_fee_paid_by_user' => true, // Buyer pays the fee
         ]);
 
         if ($response->failed()) {
