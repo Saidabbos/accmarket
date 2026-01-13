@@ -32,6 +32,23 @@ const onTelegramAuth = (user) => {
 // Make callback available globally for Telegram widget
 onMounted(() => {
     window.onTelegramAuth = onTelegramAuth;
+
+    // Telegram widget scriptini dinamik yuklash
+    if (props.telegramBotUsername) {
+        const container = document.getElementById('telegram-login-container');
+        if (container) {
+            container.innerHTML = '';
+            const script = document.createElement('script');
+            script.src = 'https://telegram.org/js/telegram-widget.js?22';
+            script.setAttribute('data-telegram-login', props.telegramBotUsername);
+            script.setAttribute('data-size', 'large');
+            script.setAttribute('data-radius', '12');
+            script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+            script.setAttribute('data-request-access', 'write');
+            script.async = true;
+            container.appendChild(script);
+        }
+    }
 });
 </script>
 
@@ -68,17 +85,8 @@ onMounted(() => {
                     <!-- Telegram Login Button -->
                     <div class="flex flex-col items-center space-y-6">
                         <!-- Telegram Widget Container -->
-                        <div id="telegram-login-container" class="flex justify-center">
-                            <component
-                                :is="'script'"
-                                async
-                                :src="`https://telegram.org/js/telegram-widget.js?22`"
-                                :data-telegram-login="telegramBotUsername"
-                                data-size="large"
-                                data-radius="12"
-                                data-onauth="onTelegramAuth(user)"
-                                data-request-access="write"
-                            />
+                        <div id="telegram-login-container" class="flex justify-center min-h-[40px]">
+                            <!-- Telegram widget bu yerga dinamik yuklanadi -->
                         </div>
 
                         <!-- Manual Telegram Button (fallback) -->
