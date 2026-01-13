@@ -268,11 +268,20 @@ const getIconUrl = (iconPath) => {
                                                 :reviews-count="product.reviews_count || 0"
                                                 size="xs"
                                             />
-                                            <span class="text-gray-300 dark:text-gray-600 hidden sm:inline">•</span>
-                                            <span class="text-emerald-600 dark:text-emerald-400 hidden sm:inline">
-                                                {{ product.available_items_count }} {{ t('shop.in_stock') }}
-                                            </span>
                                         </div>
+                                    </div>
+
+                                    <!-- Stock -->
+                                    <div class="hidden sm:flex flex-shrink-0 min-w-[80px] justify-center">
+                                        <span
+                                            v-if="product.available_items_count > 0"
+                                            class="text-xs font-medium text-emerald-600 dark:text-emerald-400"
+                                        >
+                                            {{ product.available_items_count }} {{ t('shop.in_stock') }}
+                                        </span>
+                                        <span v-else class="text-xs font-medium text-gray-400 dark:text-gray-500">
+                                            {{ t('shop.out_of_stock') }}
+                                        </span>
                                     </div>
 
                                     <!-- Price & Actions -->
