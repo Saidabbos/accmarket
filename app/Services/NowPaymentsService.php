@@ -142,6 +142,26 @@ class NowPaymentsService
                 break;
 
             case 'partially_paid':
+                // Check if the difference is just the fee (allow up to 2% difference)
+                $actuallyPaid = (float) ($payload['actually_paid'] ?? 0);
+                $payAmount = (float) ($payload['pay_amount'] ?? 0);
+
+                if ($payAmount > 0 && $actuallyPaid > 0) {
+                    $paidPercentage = ($actuallyPaid / $payAmount) * 100;
+
+                    // If paid >= 98% (fee is typically 0.5-1%), consider it as paid
+                    if ($paidPercentage >= 98) {
+                        Log::info('IPN: Accepting partially_paid as complete (fee difference)', [
+                            'order_id' => $order->id,
+                            'pay_amount' => $payAmount,
+                            'actually_paid' => $actuallyPaid,
+                            'paid_percentage' => $paidPercentage,
+                        ]);
+                        $this->completePayment($order, $paymentId, $payCurrency);
+                        break;
+                    }
+                }
+
                 $order->update(['payment_status' => 'partially_paid']);
                 break;
 
