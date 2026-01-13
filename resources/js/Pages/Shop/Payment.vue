@@ -41,6 +41,12 @@ const groupedItems = computed(() => {
     });
     return Object.values(groups);
 });
+
+// Calculate processing fee (1% of total)
+const FEE_PERCENTAGE = 0.01;
+const subtotal = computed(() => parseFloat(props.order.total_amount));
+const processingFee = computed(() => subtotal.value * FEE_PERCENTAGE);
+const totalWithFee = computed(() => subtotal.value + processingFee.value);
 </script>
 
 <template>
@@ -114,11 +120,21 @@ const groupedItems = computed(() => {
 
                     <!-- Payment Summary -->
                     <div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-semibold text-gray-900 dark:text-white">Total Amount</span>
-                            <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                                ${{ parseFloat(order.total_amount).toFixed(2) }}
-                            </span>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600 dark:text-gray-400">Subtotal</span>
+                                <span class="text-gray-900 dark:text-white">${{ subtotal.toFixed(2) }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600 dark:text-gray-400">Processing Fee (1%)</span>
+                                <span class="text-gray-900 dark:text-white">${{ processingFee.toFixed(2) }}</span>
+                            </div>
+                            <div class="border-t border-gray-200 dark:border-gray-600 pt-3 flex justify-between items-center">
+                                <span class="text-lg font-semibold text-gray-900 dark:text-white">Total</span>
+                                <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                                    ${{ totalWithFee.toFixed(2) }}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
