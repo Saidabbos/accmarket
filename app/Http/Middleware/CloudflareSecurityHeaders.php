@@ -31,11 +31,12 @@ class CloudflareSecurityHeaders
         if (app()->environment('production')) {
             $csp = [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://telegram.org",
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
                 "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:",
                 "img-src 'self' data: https:",
                 "connect-src 'self' https://nowpayments.io",
+                "frame-src 'self' https://oauth.telegram.org",
                 "frame-ancestors 'self'",
             ];
             $response->headers->set('Content-Security-Policy', implode('; ', $csp));
