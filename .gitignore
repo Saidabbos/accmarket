@@ -10,7 +10,9 @@
 /.phpunit.cache
 /.vscode
 /.zed
+/.claude
 /auth.json
+CLAUDE.md
 /node_modules
 /public/build
 /public/hot

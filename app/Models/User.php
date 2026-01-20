@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
@@ -22,6 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'email_verified_at',
         'password',
         'status',
         'ban_reason',
@@ -29,6 +30,8 @@ class User extends Authenticatable
         'telegram_id',
         'telegram_username',
         'telegram_photo_url',
+        'google_id',
+        'avatar',
     ];
 
     /**
@@ -98,5 +101,37 @@ class User extends Authenticatable
     public function sellerReviewsCount(): int
     {
         return $this->receivedReviews()->count();
+    }
+
+    /**
+     * Get the user's avatar URL (prioritize: avatar > telegram_photo_url > null)
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->avatar ?? $this->telegram_photo_url ?? null;
+    }
+
+    /**
+     * Check if user registered via email (has password)
+     */
+    public function hasEmailAuth(): bool
+    {
+        return !empty($this->email) && !empty($this->password);
+    }
+
+    /**
+     * Check if user registered via Telegram
+     */
+    public function hasTelegramAuth(): bool
+    {
+        return !empty($this->telegram_id);
+    }
+
+    /**
+     * Check if user registered via Google
+     */
+    public function hasGoogleAuth(): bool
+    {
+        return !empty($this->google_id);
     }
 }

@@ -97,6 +97,7 @@ git pull origin master --no-edit
 # Composer
 echo "📦 Composer install..."
 composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+composer dump-autoload -o
 
 # NPM
 echo "🔨 NPM build..."

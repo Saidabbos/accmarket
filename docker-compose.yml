@@ -23,7 +23,9 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - SESSION_DRIVER=database
-      - MAIL_MAILER=log
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
       - MAIL_FROM_ADDRESS=noreply@marketplace.local
       # Xdebug for PhpStorm
       - XDEBUG_MODE=debug

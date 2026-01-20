@@ -40,12 +40,17 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'status' => 'active',
         ]);
+
+        // Assign default buyer role
+        $user->assignRole('buyer');
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('shop.index', absolute: false));
+        // Redirect to email verification notice
+        return redirect()->route('verification.notice');
     }
 }
