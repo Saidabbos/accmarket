@@ -29,7 +29,20 @@
       "Bash(fi)",
       "Bash(composer require:*)",
       "Bash(php composer.phar require:*)",
-      "Bash(C:/Users/ssula/scoop/apps/php/current/php.exe C:/Users/ssula/scoop/apps/composer/current/composer.phar require:*)"
+      "Bash(C:/Users/ssula/scoop/apps/php/current/php.exe C:/Users/ssula/scoop/apps/composer/current/composer.phar require:*)",
+      "Bash(wsl bash -c 'cd /mnt/c/Users/ssula/projects/mpa && ssh root@178.128.205.23 \"\"cd /var/www/accssio && php artisan down --retry=60 --refresh=5 && git fetch origin master && git pull origin master --no-edit && composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev && npm ci --silent && npm run build && php artisan migrate --force && php artisan cache:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan event:cache && php artisan queue:restart && sudo chown -R www-data:www-data storage bootstrap/cache && sudo chmod -R 775 storage bootstrap/cache && sudo systemctl reload php8.2-fpm && php artisan up && echo Deploy completed!\"\"')",
+      "Bash(wsl bash -c 'ssh root@178.128.205.23 \"\"cd /var/www/accssio && php artisan up && echo Site is live!\"\"')",
+      "Bash(git restore:*)",
+      "Bash(wsl ssh root@178.128.205.23 \"cd /var/www/accssio && php artisan down --retry=60 --refresh=5 || true && git stash --include-untracked 2>/dev/null || true && git fetch origin master && git pull origin master --no-edit && composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev && npm ci --silent && npm run build && php artisan migrate --force && php artisan cache:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan event:cache && php artisan queue:restart && sudo chown -R www-data:www-data storage bootstrap/cache && sudo chmod -R 775 storage bootstrap/cache && sudo systemctl reload php8.2-fpm && git stash pop 2>/dev/null || echo ''Stash empty'' && php artisan up && echo ''Deploy completed!''\")",
+      "Bash(wsl ssh root@178.128.205.23 \"cd /var/www/accssio && php artisan down --retry=60 --refresh=5 || true && git stash --include-untracked 2>/dev/null || true && git fetch origin master && git pull origin master --no-edit && composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev && npm ci --silent && npm run build && php artisan storage:link 2>/dev/null || true && php artisan cache:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache && sudo chown -R www-data:www-data storage bootstrap/cache && sudo chmod -R 775 storage bootstrap/cache && sudo systemctl reload php8.2-fpm && git stash pop 2>/dev/null || echo ''Stash empty'' && php artisan up && echo ''Deploy completed!''\")",
+      "Bash(wsl ssh root@178.128.205.23 \"cd /var/www/accssio && composer dump-autoload -o\")",
+      "Bash(ssh root@178.128.205.23 'cd /var/www/accssio && php artisan down --retry=60 && git pull origin master && npm ci --silent && npm run build && php artisan cache:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan up')",
+      "Bash(wsl ssh root@178.128.205.23 'cd /var/www/accssio && php artisan down --retry=60 && git pull origin master && npm ci --silent && npm run build && php artisan cache:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan up')",
+      "Bash(wsl ssh root@178.128.205.23 'cd /var/www/accssio && git stash && git pull origin master && npm ci --silent && npm run build && php artisan cache:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan up')",
+      "Bash(wsl ssh:*)",
+      "Bash(wsl bash:*)",
+      "Bash(ssh root@178.128.205.23 'cd /var/www/accssio && php artisan down --retry=60 --refresh=5 && git stash --include-untracked 2>/dev/null || true && git fetch origin master && git pull origin master --no-edit && npm ci --silent && npm run build && php artisan cache:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan up')",
+      "Bash(powershell.exe -Command \"ssh root@178.128.205.23 ''cd /var/www/accssio && php artisan down --retry=60 --refresh=5''\")"
     ]
   }
 }
