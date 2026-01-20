@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed, Transition } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import StarRating from '@/Components/StarRating.vue';
@@ -24,6 +24,29 @@ const sort = ref(props.filters.sort || 'newest');
 // Buy modal state
 const showBuyModal = ref(false);
 const selectedProduct = ref(null);
+
+// Mobile filter drawer state
+const showMobileFilters = ref(false);
+
+// Count active filters
+const activeFilterCount = computed(() => {
+    let count = 0;
+    if (search.value) count++;
+    if (minPrice.value) count++;
+    if (maxPrice.value) count++;
+    if (sort.value !== 'newest') count++;
+    return count;
+});
+
+const applyMobileFilters = () => {
+    applyFilters();
+    showMobileFilters.value = false;
+};
+
+const clearMobileFilters = () => {
+    clearFilters();
+    showMobileFilters.value = false;
+};
 
 const applyFilters = debounce(() => {
     router.get(route('shop.index'), {
@@ -132,15 +155,33 @@ const getIconUrl = (iconPath) => {
         <div class="py-8">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
-                <div class="mb-8">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{{ t('common.shop') }}</h1>
-                    <p class="mt-2 text-gray-600 dark:text-gray-400">{{ t('shop.subtitle') }}</p>
+                <div class="mb-8 flex items-start justify-between">
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{{ t('common.shop') }}</h1>
+                        <p class="mt-2 text-gray-600 dark:text-gray-400">{{ t('shop.subtitle') }}</p>
+                    </div>
+                    <!-- Mobile Filter Button -->
+                    <button
+                        @click="showMobileFilters = true"
+                        class="lg:hidden flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        <span>{{ t('common.filters') || 'Filters' }}</span>
+                        <span
+                            v-if="activeFilterCount > 0"
+                            class="flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-indigo-600 rounded-full"
+                        >
+                            {{ activeFilterCount }}
+                        </span>
+                    </button>
                 </div>
 
                 <!-- Product List -->
                 <div>
-                        <!-- Filters Bar -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 mb-6">
+                        <!-- Desktop Filters Bar (hidden on mobile) -->
+                        <div class="hidden lg:block bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 mb-6">
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <!-- Search -->
                                 <div>
@@ -355,6 +396,153 @@ const getIconUrl = (iconPath) => {
             :product="selectedProduct"
             @close="closeBuyModal"
         />
+
+        <!-- Mobile Filter Drawer -->
+        <Teleport to="body">
+            <Transition name="fade">
+                <div
+                    v-if="showMobileFilters"
+                    class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                    @click="showMobileFilters = false"
+                />
+            </Transition>
+
+            <Transition name="slide-right">
+                <div
+                    v-if="showMobileFilters"
+                    class="fixed inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-gray-800 shadow-xl z-50 lg:hidden flex flex-col"
+                >
+                    <!-- Drawer Header -->
+                    <div class="flex items-center justify-between px-4 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('common.filters') || 'Filters' }}</h2>
+                        <button
+                            @click="showMobileFilters = false"
+                            class="p-2 -mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Drawer Content -->
+                    <div class="flex-1 overflow-y-auto p-4 space-y-5">
+                        <!-- Search -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('common.search') }}</label>
+                            <div class="relative">
+                                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <input
+                                    v-model="search"
+                                    type="text"
+                                    :placeholder="t('shop.search')"
+                                    class="w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Price Range -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('shop.price_range') || 'Price Range' }}</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <input
+                                        v-model="minPrice"
+                                        type="number"
+                                        :placeholder="t('shop.min_price')"
+                                        min="0"
+                                        class="w-full py-2.5 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <input
+                                        v-model="maxPrice"
+                                        type="number"
+                                        :placeholder="t('shop.max_price')"
+                                        min="0"
+                                        class="w-full py-2.5 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sort By -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('shop.sort_by') }}</label>
+                            <select
+                                v-model="sort"
+                                class="w-full py-2.5 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                                <option value="newest">{{ t('shop.newest') }}</option>
+                                <option value="price_asc">{{ t('shop.price_low') }}</option>
+                                <option value="price_desc">{{ t('shop.price_high') }}</option>
+                                <option value="name">Name A-Z</option>
+                            </select>
+                        </div>
+
+                        <!-- Active Filters Summary -->
+                        <div v-if="activeFilterCount > 0" class="pt-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Active:</span>
+                                <span v-if="search" class="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-xs font-medium text-indigo-700 dark:text-indigo-300">
+                                    "{{ search }}"
+                                </span>
+                                <span v-if="minPrice" class="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-xs font-medium text-indigo-700 dark:text-indigo-300">
+                                    Min: ${{ minPrice }}
+                                </span>
+                                <span v-if="maxPrice" class="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-xs font-medium text-indigo-700 dark:text-indigo-300">
+                                    Max: ${{ maxPrice }}
+                                </span>
+                                <span v-if="sort !== 'newest'" class="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-xs font-medium text-indigo-700 dark:text-indigo-300">
+                                    {{ sort === 'price_asc' ? 'Low to High' : sort === 'price_desc' ? 'High to Low' : 'A-Z' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Drawer Footer -->
+                    <div class="flex gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
+                        <button
+                            @click="clearMobileFilters"
+                            class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                            {{ t('common.clear_all') || 'Clear All' }}
+                        </button>
+                        <button
+                            @click="applyMobileFilters"
+                            class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+                        >
+                            {{ t('common.apply') || 'Apply Filters' }}
+                        </button>
+                    </div>
+                </div>
+            </Transition>
+        </Teleport>
     </AppLayout>
 </template>
 
+<style scoped>
+/* Fade transition for backdrop */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+/* Slide from right transition for drawer */
+.slide-right-enter-active,
+.slide-right-leave-active {
+    transition: transform 0.3s ease;
+}
+
+.slide-right-enter-from,
+.slide-right-leave-to {
+    transform: translateX(100%);
+}
+</style>
